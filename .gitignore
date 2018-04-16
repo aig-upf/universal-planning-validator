@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+*.sconsign.dblite
+validator/validate
