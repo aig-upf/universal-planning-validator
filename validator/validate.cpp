@@ -10,13 +10,14 @@ int main( int argc, char * argv[] ) {
         exit(1);
     }
 
-    Domain d( argv[1] );
-    Instance ins( d, argv[2] );
+    Domain * d = new Domain( argv[1] );
+    Instance * ins = new Instance( *d, argv[2] );
     Plan p( argv[3] );
 
-    std::cout << d << "\n";
-    std::cout << ins << "\n";
-    std::cout << p << "\n";
+    p.validate( d, ins );
+
+    delete ins;
+    delete d;
 
 	return 0;
 }

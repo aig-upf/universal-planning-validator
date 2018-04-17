@@ -1,7 +1,8 @@
-
 #pragma once
 
+#include <parser/Instance.h>
 #include <parser/Filereader.h>
+#include "State.h"
 
 using namespace parser::pddl;
 
@@ -64,6 +65,14 @@ public:
             ++f.r;
             getline( f.f, f.s );
         }
+    }
+
+    void validate( Domain * d, Instance * ins ) const {
+        // build initial state
+        State initialState( d, ins );
+
+        // validar each action depending on the current state and create new state if preconditions hold
+        // throw exception if validation fails
     }
 
     friend std::ostream& operator<<( std::ostream& os, const Plan& p ) {
