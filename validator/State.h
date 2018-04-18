@@ -6,7 +6,7 @@ using namespace parser::pddl;
 
 class State {
 public:
-    std::map< std::string, std::set< StringVec > > fluents; // map of active fluents
+    std::map< std::string, std::set< StringVec > > fluents;  // map of active fluents
 
     State( Domain * d, Instance * ins ) {
         set( d, ins );
@@ -29,41 +29,24 @@ public:
     }
 
     // checks if a condition holds
-    bool holds( bool neg, const std::string& name, const StringVec& params ) const {
-
-        const std::set< StringVec >& posFluents = fluents.find(name)->second;
-
-        bool fluentExists = posFluents.find( params ) != posFluents.end();
-
+    bool holds( bool neg, const std::string& name, const StringVec& params ) {
+        std::set< StringVec >& activeFluents = getActiveFluents( name );
+        bool fluentExists = activeFluents.find( params ) != activeFluents.end();
         return ( neg && !fluentExists ) || ( !neg && fluentExists );
     }
 
     void addFluent( const std::string& name, const StringVec& params ) {
-        auto fluentSet = fluents.find( name );
-
-        if ( fluentSet != fluents.end() ) {
-            std::set< StringVec >& activeFluents = fluentSet->second;
-            if ( activeFluents.find( params ) == activeFluents.end() ) {
-                activeFluents.insert( params );
-            }
-        }
-        else {
-            // throw exception
+        std::set< StringVec >& activeFluents = getActiveFluents( name );
+        if ( activeFluents.find( params ) == activeFluents.end() ) {
+            activeFluents.insert( params );
         }
     }
 
     void removeFluent( const std::string& name, const StringVec& params ) {
-        auto fluentSet = fluents.find( name );
-
-        if ( fluentSet != fluents.end() ) {
-            std::set< StringVec >& activeFluents = fluentSet->second;
-            std::set< StringVec >::iterator af = activeFluents.find( params );
-            if ( af != activeFluents.end() ) {
-                activeFluents.erase( af );
-            }
-        }
-        else {
-            // throw exception
+        std::set< StringVec >& activeFluents = getActiveFluents( name );
+        std::set< StringVec >::iterator af = activeFluents.find( params );
+        if ( af != activeFluents.end() ) {
+            activeFluents.erase( af );
         }
     }
 
@@ -76,5 +59,17 @@ public:
         }
 
         return true;
+    }
+
+protected:
+    std::set< StringVec >& getActiveFluents( const std::string& name ) {
+        auto fluentSet = fluents.find( name );
+
+        if ( fluentSet != fluents.end() ) {
+            return fluentSet->second;
+        }
+        else {
+            // TODO: throw exception
+        }
     }
 };
