@@ -144,8 +144,6 @@ public:
         // build initial state
         State * currentState = new State( d, ins );
 
-        // validar each action depending on the current state and create new state if preconditions hold
-        // throw exception if validation fails
         bool validSeq = true;
 
         for ( unsigned i = 0; i < actions.size() && validSeq; ++i ) {
@@ -153,18 +151,20 @@ public:
                 actions[i].apply( currentState, d );
             }
             else {
-                std::cout << "invalid plan\n";
+                std::cout << "Plan failed to execute\n";
                 validSeq = false;
             }
         }
 
         //comprobar si se cumplen las condiciones de la meta!
         if ( validSeq ) {
+            std::cout << "Plan executed successfully - checking goal\n";
+
             if ( currentState->satisfiesGoal( d, ins ) ) {
-                std::cout << "SAT!\n";
+                std::cout << "Plan valid\n";
             }
             else {
-                std::cout << "UNSAT\n";
+                std::cout << "Goal not satisifed\nPlan invalid\n";
             }
         }
 
