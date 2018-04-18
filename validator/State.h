@@ -1,8 +1,14 @@
 #pragma once
 
+#include <stdexcept>
 #include <parser/Instance.h>
 
 using namespace parser::pddl;
+
+class FluentNotFound : public std::runtime_error {
+public:
+    FluentNotFound( const std::string& fluent ) : std::runtime_error( "Fluent " + fluent + " is undefined" ) {}
+};
 
 class State {
 public:
@@ -12,6 +18,7 @@ public:
         set( d, ins );
     }
 
+    // sets state from initial fluents in an instance
     void set( Domain * d, Instance * ins ) {
         for ( unsigned i = 0; i < d->preds.size(); ++i ) {
             const std::string& pname = d->preds[i]->name;
@@ -21,7 +28,6 @@ public:
         const GroundVec& initialState = ins->init;
         for ( unsigned i = 0; i < initialState.size(); ++i ) {
             const std::string& groundName = initialState[i]->name;
-
             if ( fluents.find( groundName ) != fluents.end() ) {
                 fluents[groundName].insert( d->objectList( initialState[i] ) );
             }
@@ -69,7 +75,7 @@ protected:
             return fluentSet->second;
         }
         else {
-            // TODO: throw exception
+            throw FluentNotFound( name );
         }
     }
 };
