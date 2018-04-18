@@ -27,4 +27,54 @@ public:
             }
         }
     }
+
+    // checks if a condition holds
+    bool holds( bool neg, const std::string& name, const StringVec& params ) const {
+
+        const std::set< StringVec >& posFluents = fluents.find(name)->second;
+
+        bool fluentExists = posFluents.find( params ) != posFluents.end();
+
+        return ( neg && !fluentExists ) || ( !neg && fluentExists );
+    }
+
+    void addFluent( const std::string& name, const StringVec& params ) {
+        auto fluentSet = fluents.find( name );
+
+        if ( fluentSet != fluents.end() ) {
+            std::set< StringVec >& activeFluents = fluentSet->second;
+            if ( activeFluents.find( params ) == activeFluents.end() ) {
+                activeFluents.insert( params );
+            }
+        }
+        else {
+            // throw exception
+        }
+    }
+
+    void removeFluent( const std::string& name, const StringVec& params ) {
+        auto fluentSet = fluents.find( name );
+
+        if ( fluentSet != fluents.end() ) {
+            std::set< StringVec >& activeFluents = fluentSet->second;
+            std::set< StringVec >::iterator af = activeFluents.find( params );
+            if ( af != activeFluents.end() ) {
+                activeFluents.erase( af );
+            }
+        }
+        else {
+            // throw exception
+        }
+    }
+
+    bool satisfiesGoal( Domain * d, Instance * ins ) {
+        const GroundVec& goalConditions = ins->goal;
+        for ( unsigned i = 0; i < goalConditions.size(); ++i ) {
+            if ( !holds( false, goalConditions[i]->name, d->objectList( goalConditions[i] ) ) ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 };
