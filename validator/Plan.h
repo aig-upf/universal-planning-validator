@@ -24,38 +24,9 @@ public:
     }
 
     void apply( State * s, Domain * d ) {
-        Action * action = d->actions.get( name );
-        Condition * actionEff = action->eff;
-
-        And * a = dynamic_cast< And * >( actionEff );
-
-        for ( unsigned i = 0; i < a->conds.size(); ++i ) {
-            Ground * g = dynamic_cast< Ground * >( a->conds[i] );
-            if ( g ) {
-                const std::string& groundName = g->name;
-                const IntVec& groundParams = g->params;
-
-                StringVec groundParamsObj;
-                for ( unsigned j = 0; j < groundParams.size(); ++j ) {
-                    groundParamsObj.push_back( params[groundParams[j]] );
-                }
-
-                s->addFluent( groundName, groundParamsObj );
-            }
-
-            Not * n = dynamic_cast< Not * >( a->conds[i] );
-            if ( n ) {
-                Ground * ng = n->cond;
-                const std::string& groundName = ng->name;
-                const IntVec& groundParams = ng->params;
-
-                StringVec groundParamsObj;
-                for ( unsigned j = 0; j < groundParams.size(); ++j ) {
-                    groundParamsObj.push_back( params[groundParams[j]] );
-                }
-
-                s->removeFluent( groundName, groundParamsObj );
-            }
+        Action * a = d->actions.get( name );
+        if ( a ) {
+            applyRec( s, d, a->eff );
         }
     }
 
@@ -93,12 +64,32 @@ protected:
         Not * n = dynamic_cast< Not * >( c );
         if ( n ) {
             Ground * ng = n->cond;
-            if ( !s->holds( false, ng->name, getObjectParameters( ng->params ) ) ) {
+            if ( !s->holds( true, ng->name, getObjectParameters( ng->params ) ) ) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    void applyRec( State * s, Domain * d, Condition * c ) {
+        And * a = dynamic_cast< And * >( c );
+        if ( a ) {
+            for ( unsigned i = 0; i < a->conds.size(); ++i ) {
+                applyRec( s, d, a->conds[i] );
+            }
+        }
+
+        Ground * g = dynamic_cast< Ground * >( c );
+        if ( g ) {
+            s->addFluent( g->name, getObjectParameters( g->params ) );
+        }
+
+        Not * n = dynamic_cast< Not * >( c );
+        if ( n ) {
+            Ground * ng = n->cond;
+            s->removeFluent( ng->name, getObjectParameters( ng->params ) );
+        }
     }
 
     StringVec getObjectParameters( IntVec& groundParams ) {
