@@ -90,6 +90,11 @@ protected:
             return existsHoldsRec( existsParams, 0, s, d, e->cond );
         }
 
+        Or * o = dynamic_cast< Or * >( c );
+        if ( o ) {
+            return holdsRec( s, d, o->first ) || holdsRec( s, d, o->second );
+        }
+
         return true;
     }
 
