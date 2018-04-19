@@ -1,6 +1,6 @@
 (define (domain forall-test-1)
     (:requirements :typing :universal-preconditions :negative-preconditions)
-    (:types knight - object)
+    (:types knight king - object)
     (:predicates
         (has-shouted ?a - knight)
         (is-ready ?a - knight)
@@ -14,5 +14,10 @@
         :parameters (?a - knight)
         :precondition (forall (?a2 - knight) (is-ready ?a2))
         :effect (has-shouted ?a)
+    )
+    (:action shout-get-ready-at-once
+        :parameters (?k - king)
+        :precondition ()
+        :effect (forall (?a - knight) (is-ready ?a))
     )
 )

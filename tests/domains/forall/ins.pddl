@@ -1,7 +1,7 @@
 (define (problem forall-test-1-p1)
 (:domain forall-test-1)
 
-(:objects k1 k2 k3 - knight)
+(:objects k1 k2 k3 - knight king - king)
 
 (:init
 
