@@ -86,7 +86,8 @@ protected:
 
         Exists * e = dynamic_cast< Exists * >( c );
         if ( e ) {
-            // TODO
+            StringVec existsParams = d->typeList( f );
+            return existsHoldsRec( existsParams, 0, s, d, e->cond );
         }
 
         return true;
@@ -114,6 +115,28 @@ protected:
         }
 
         return true;
+    }
+
+    bool existsHoldsRec( const StringVec& existsParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
+        if ( paramIndex < existsParams.size() ) {
+            Type * type = d->getType( existsParams[paramIndex] );
+
+            for ( unsigned i = 0; i < type->noObjects(); ++i ) {
+                std::pair< std::string, int > typeObj = type->object( i );
+                params.push_back( typeObj.first );  // expand action params
+                bool result = existsHoldsRec( existsParams, paramIndex + 1, s, d, c );
+                params.pop_back();  // remove previously added params
+
+                if ( result ) {
+                    return true;
+                }
+            }
+        }
+        else {
+            return holdsRec( s, d, c );
+        }
+
+        return false;
     }
 
     void applyRec( State * s, Domain * d, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList ) {
