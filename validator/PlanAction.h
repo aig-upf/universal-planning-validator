@@ -86,7 +86,7 @@ protected:
 
         Exists * e = dynamic_cast< Exists * >( c );
         if ( e ) {
-            StringVec existsParams = d->typeList( f );
+            StringVec existsParams = d->typeList( e );
             return existsHoldsRec( existsParams, 0, s, d, e->cond );
         }
 
