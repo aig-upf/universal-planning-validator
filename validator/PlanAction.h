@@ -70,7 +70,7 @@ protected:
         Forall * f = dynamic_cast< Forall * >( c );
         if ( f ) {
             StringVec forallParams = d->typeList( f );
-            return forallRec( forallParams, 0, s, d, f->cond );
+            return forallHoldsRec( forallParams, 0, s, d, f->cond );
         }
 
         Exists * e = dynamic_cast< Exists * >( c );
@@ -81,14 +81,14 @@ protected:
         return true;
     }
 
-    bool forallRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
+    bool forallHoldsRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
         if ( paramIndex < forallParams.size() ) {
             Type * type = d->getType( forallParams[paramIndex] );
 
             for ( unsigned i = 0; i < type->noObjects(); ++i ) {
                 std::pair< std::string, int > typeObj = type->object( i );
                 params.push_back( typeObj.first );  // expand action params
-                bool result = forallRec( forallParams, paramIndex + 1, s, d, c );
+                bool result = forallHoldsRec( forallParams, paramIndex + 1, s, d, c );
                 params.pop_back();  // remove previously added params
 
                 if ( !result ) {
