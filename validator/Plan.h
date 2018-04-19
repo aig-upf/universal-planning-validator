@@ -69,6 +69,16 @@ protected:
             }
         }
 
+        Forall * f = dynamic_cast< Forall * >( c );
+        if ( f ) {
+            // TODO
+        }
+
+        Exists * e = dynamic_cast< Exists * >( c );
+        if ( e ) {
+            // TODO
+        }
+
         return true;
     }
 
@@ -89,6 +99,11 @@ protected:
         if ( n ) {
             Ground * ng = n->cond;
             s->removeFluent( ng->name, getObjectParameters( ng->params ) );
+        }
+
+        Forall * f = dynamic_cast< Forall * >( c );
+        if ( f ) {
+            // TODO
         }
     }
 
