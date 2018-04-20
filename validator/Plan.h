@@ -57,20 +57,20 @@ public:
                 actions[i].apply( currentState, d );
             }
             else {
-                std::cout << "Plan failed to execute\n";
+                showMsg( "Plan failed to execute" );
                 validSeq = false;
             }
         }
 
         //comprobar si se cumplen las condiciones de la meta!
         if ( validSeq ) {
-            std::cout << "Plan executed successfully - checking goal\n";
+            showMsg( "Plan executed successfully - checking goal" );
 
             if ( currentState->satisfiesGoal( d, ins ) ) {
-                std::cout << "Plan valid\n";
+                showSuccessMsg( "Plan valid" );
             }
             else {
-                std::cout << "Goal not satisifed\nPlan invalid\n";
+                showErrorMsg( "Goal not satisifed - Plan invalid" );
             }
         }
 

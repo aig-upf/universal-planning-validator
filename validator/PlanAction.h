@@ -1,6 +1,7 @@
 #pragma once
 
 #include "State.h"
+#include "Message.h"
 
 using namespace parser::pddl;
 
@@ -15,12 +16,13 @@ public:
         : name( name ), params( params ) {}
 
     bool holds( State * s, Domain * d ) {
-        Action * a = d->actions.get( name );
-        if ( a ) {
+        if ( d->actions.index( name ) >= 0 ) {
+            Action * a = d->actions.get( name );
             return holdsRec( s, d, a->pre );
         }
 
-        return false; // add warning -> the action does not exist!
+        showErrorMsg( "Unknown action " + getActionName() );
+        return false;
     }
 
     void apply( State * s, Domain * d ) {
@@ -39,16 +41,22 @@ public:
         }
     }
 
+    std::string getActionName() const {
+        std::stringstream ss;
+        ss << "(" << name;
+        for ( unsigned i = 0; i < params.size(); ++i ) {
+            ss << " " << params[i];
+        }
+        ss << ")";
+        return ss.str();
+    }
+
     friend std::ostream& operator<<( std::ostream& os, const PlanAction& pa ) {
         return pa.print( os );
     }
 
     virtual std::ostream& print( std::ostream& stream ) const {
-        stream << "(" << name;
-        for ( unsigned i = 0; i < params.size(); ++i ) {
-            stream << " " << params[i];
-        }
-        stream << ")\n";
+        stream << getActionName() << '\n';
         return stream;
     }
 
