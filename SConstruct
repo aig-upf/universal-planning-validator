@@ -43,6 +43,15 @@ base.Append(LIBS=[File(os.path.join(base['pddl_parser_path'], 'lib/libparser.a')
 build_dirname = 'build'
 base.VariantDir(build_dirname, '.')
 
-validate = base.Program( "validator/validate", ["validator/validate.cpp"] )
+validate = base.Program( "validator/validate.bin", ["validator/validate.cpp"] )
 
 base.AlwaysBuild( validate )
+
+extra = base.Clone()
+
+extra.Append(LIBS=[
+	File(base['pddl_parser_path'] + '/lib/libparser.a')
+])
+
+# Register the different examples and tests
+SConscript('tests/SConscript', exports='extra')

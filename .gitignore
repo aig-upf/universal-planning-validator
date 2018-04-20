@@ -33,3 +33,4 @@
 
 *.sconsign.dblite
 validator/validate
+*bin
