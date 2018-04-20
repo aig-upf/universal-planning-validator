@@ -65,7 +65,7 @@ protected:
 
         Ground * g = dynamic_cast< Ground * >( c );
         if ( g ) {
-            if ( !s->holds( false, g->name, getObjectParameters( g->params ) ) ) {
+            if ( !s->holds( false, g->name, getObjectParameters( d, g ) ) ) {
                 return false;
             }
         }
@@ -73,7 +73,7 @@ protected:
         Not * n = dynamic_cast< Not * >( c );
         if ( n ) {
             Ground * ng = n->cond;
-            if ( !s->holds( true, ng->name, getObjectParameters( ng->params ) ) ) {
+            if ( !s->holds( true, ng->name, getObjectParameters( d, ng ) ) ) {
                 return false;
             }
         }
@@ -154,13 +154,13 @@ protected:
 
         Ground * g = dynamic_cast< Ground * >( c );
         if ( g ) {
-            addList.push_back( std::make_pair( g->name, getObjectParameters( g->params ) ) );
+            addList.push_back( std::make_pair( g->name, getObjectParameters( d, g ) ) );
         }
 
         Not * n = dynamic_cast< Not * >( c );
         if ( n ) {
             Ground * ng = n->cond;
-            deleteList.push_back( std::make_pair( ng->name, getObjectParameters( ng->params ) ) );
+            deleteList.push_back( std::make_pair( ng->name, getObjectParameters( d, ng ) ) );
         }
 
         Forall * f = dynamic_cast< Forall * >( c );
@@ -196,10 +196,17 @@ protected:
         }
     }
 
-    StringVec getObjectParameters( IntVec& groundParams ) {
+    StringVec getObjectParameters( Domain * d, Ground * g ) {
+        IntVec& groundParams = g->params;
         StringVec objParams;
-        for ( unsigned j = 0; j < groundParams.size(); ++j ) {
-            objParams.push_back( params[groundParams[j]] );
+        for ( unsigned i = 0; i < groundParams.size(); ++i ) {
+            if ( groundParams[i] >= 0 ) {
+                objParams.push_back( params[groundParams[i]] );
+            }
+            else { // constant
+                Type * constantType = d->types[g->lifted->params[i]];
+                objParams.push_back( constantType->object( groundParams[i] ).first );
+            }
         }
         return objParams;
     }
