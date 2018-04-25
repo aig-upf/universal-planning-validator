@@ -5,7 +5,9 @@
 
 using namespace parser::pddl;
 
-typedef std::vector< std::pair< std::string, StringVec > > GroundedObjVec;
+typedef std::pair< std::string, StringVec > GroundedObj;
+typedef std::vector< GroundedObj > GroundedObjVec;
+std::string getGroundedObjectStr( const GroundedObj& go );
 
 class PlanAction {
 public:
@@ -32,10 +34,12 @@ public:
             applyRec( s, d, a->eff, addList, deleteList );
 
             for ( auto it = addList.begin(); it != addList.end(); ++it ) {
+                showMsg( "Adding " + getGroundedObjectStr( *it ) );
                 s->addFluent( it->first, it->second );
             }
 
             for ( auto it = deleteList.begin(); it != deleteList.end(); ++it ) {
+                showMsg( "Deleting " + getGroundedObjectStr( *it ) );
                 s->removeFluent( it->first, it->second );
             }
         }
@@ -219,3 +223,13 @@ protected:
         return objParams;
     }
 };
+
+std::string getGroundedObjectStr( const GroundedObj& go ) {
+    std::stringstream ss;
+    ss << "(" << go.first;
+    for ( unsigned i = 0; i < go.second.size(); ++i ) {
+        ss << " " << go.second[i];
+    }
+    ss << ")";
+    return ss.str();
+}

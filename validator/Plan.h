@@ -9,6 +9,7 @@ using namespace parser::pddl;
 
 class Plan {
 public:
+    std::string name;
     std::vector< PlanAction > actions;
 
     Plan() {}
@@ -18,6 +19,8 @@ public:
     }
 
     void parse( const std::string & s ) {
+        actions.clear();
+
         Filereader f( s );
 
         while ( !f.f.eof() && !f.s.empty() ) {
@@ -44,37 +47,8 @@ public:
             ++f.r;
             getline( f.f, f.s );
         }
-    }
 
-    void validate( Domain * d, Instance * ins ) {
-        // build initial state
-        State * currentState = new State( d, ins );
-
-        bool validSeq = true;
-
-        for ( unsigned i = 0; i < actions.size() && validSeq; ++i ) {
-            if ( actions[i].holds( currentState, d ) ) {
-                actions[i].apply( currentState, d );
-            }
-            else {
-                showMsg( "Plan failed to execute" );
-                validSeq = false;
-            }
-        }
-
-        //comprobar si se cumplen las condiciones de la meta!
-        if ( validSeq ) {
-            showMsg( "Plan executed successfully - checking goal" );
-
-            if ( currentState->satisfiesGoal( d, ins ) ) {
-                showSuccessMsg( "Plan valid" );
-            }
-            else {
-                showErrorMsg( "Goal not satisifed - Plan invalid" );
-            }
-        }
-
-        delete currentState;
+        name = s;
     }
 
     friend std::ostream& operator<<( std::ostream& os, const Plan& p ) {
