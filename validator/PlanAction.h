@@ -33,15 +33,8 @@ public:
             GroundedObjVec addList, deleteList;
             applyRec( s, d, a->eff, addList, deleteList );
 
-            for ( auto it = addList.begin(); it != addList.end(); ++it ) {
-                showMsg( "Adding " + getGroundedObjectStr( *it ) );
-                s->addFluent( it->first, it->second );
-            }
-
-            for ( auto it = deleteList.begin(); it != deleteList.end(); ++it ) {
-                showMsg( "Deleting " + getGroundedObjectStr( *it ) );
-                s->removeFluent( it->first, it->second );
-            }
+            applyDeleteList( s, deleteList );
+            applyAddList( s, addList );
         }
     }
 
@@ -208,7 +201,7 @@ protected:
         }
     }
 
-    StringVec getObjectParameters( Domain * d, Ground * g ) {
+    StringVec getObjectParameters( Domain * d, Ground * g ) const {
         IntVec& groundParams = g->params;
         StringVec objParams;
         for ( unsigned i = 0; i < groundParams.size(); ++i ) {
@@ -221,6 +214,20 @@ protected:
             }
         }
         return objParams;
+    }
+
+    void applyDeleteList( State * s, const GroundedObjVec& deleteList ) const {
+        for ( auto it = deleteList.begin(); it != deleteList.end(); ++it ) {
+            showMsg( "Deleting " + getGroundedObjectStr( *it ) );
+            s->removeFluent( it->first, it->second );
+        }
+    }
+
+    void applyAddList( State * s, const GroundedObjVec& addList ) const {
+        for ( auto it = addList.begin(); it != addList.end(); ++it ) {
+            showMsg( "Adding " + getGroundedObjectStr( *it ) );
+            s->addFluent( it->first, it->second );
+        }
     }
 };
 
