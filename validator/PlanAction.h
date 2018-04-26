@@ -229,6 +229,11 @@ protected:
             s->addFluent( it->first, it->second );
         }
     }
+
+    bool showVerbose() {
+        // PlanValidator * pv = PlanValidator::getInstance();
+        return false;
+    }
 };
 
 std::string getGroundedObjectStr( const GroundedObj& go ) {

@@ -68,8 +68,8 @@ int main( int argc, char * argv[] ) {
     Instance ins( d, pp.ins );
     Plan p( pp.plan );
 
-    PlanValidator pv( pp.verbose );
-    pv.validate( &d, &ins, &p );
+    PlanValidator * pv = PlanValidator::getInstance();
+    pv->validate( &d, &ins, &p );
 
     return 0;
 }

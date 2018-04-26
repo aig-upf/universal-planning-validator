@@ -8,10 +8,19 @@ using namespace parser::pddl;
 
 class PlanValidator {
 private:
+    static PlanValidator * instance;
     bool verbose;
 
+protected:
+    PlanValidator() : verbose( false ) {}
+
 public:
-    PlanValidator( bool verbose=false ) : verbose( verbose ) {}
+    static PlanValidator * getInstance() {
+        if ( instance == nullptr ) {
+            instance = new PlanValidator();
+        }
+        return instance;
+    }
 
     void validate( Domain * d, Instance * ins, Plan * p ) {
         State * currentState = new State( d, ins ); // initial state
@@ -25,6 +34,14 @@ public:
         delete currentState;
     }
 
+    void setVerbose( bool v ) {
+        verbose = v;
+    }
+
+    bool getVerbose( bool v ) {
+        return verbose;
+    }
+
 private:
     bool runActionSequence( Domain * d, Plan * p, State * currentState ) {
         bool isValidSeq = true;
@@ -33,7 +50,9 @@ private:
         auto action = p->actions.begin();
 
         for ( ; isValidSeq && action != p->actions.end(); ++action, ++actionNum ) {
-            showMsg( "Checking next happening (time " + std::to_string( actionNum ) + ")" );
+            if ( verbose ) {
+                showMsg( "Checking next happening (time " + std::to_string( actionNum ) + ")" );
+            }
 
             if ( action->holds( currentState, d ) ) {
                 action->apply( currentState, d );
@@ -59,3 +78,5 @@ private:
         }
     }
 };
+
+PlanValidator * PlanValidator::instance = nullptr;

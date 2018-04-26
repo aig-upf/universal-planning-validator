@@ -38,8 +38,8 @@ public:
     }
 
     void callValidator( Domain * d, Instance * ins, Plan * p ) {
-        PlanValidator pv;
-        pv.validate( d, ins, p );
+        PlanValidator * pv = PlanValidator::getInstance();
+        pv->validate( d, ins, p );
     }
 
     void elevatorTest() {
