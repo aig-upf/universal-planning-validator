@@ -69,6 +69,7 @@ int main( int argc, char * argv[] ) {
     Plan p( pp.plan );
 
     PlanValidator * pv = PlanValidator::getInstance();
+    pv->setVerbose( pp.verbose );
     pv->validate( &d, &ins, &p );
 
     return 0;
