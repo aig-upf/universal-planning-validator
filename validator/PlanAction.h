@@ -45,8 +45,6 @@ protected:
     void applyDeleteList( State * s, const GroundedObjVec& deleteList ) const;
 
     void applyAddList( State * s, const GroundedObjVec& addList ) const;
-
-    bool showVerbose();
 };
 
 std::string getGroundedObjectStr( const GroundedObj& go );

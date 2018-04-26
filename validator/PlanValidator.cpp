@@ -12,7 +12,7 @@ PlanValidator * PlanValidator::getInstance() {
     return instance;
 }
 
-void PlanValidator::validate( Domain * d, Instance * ins, Plan * p ) {
+void PlanValidator::validate( Domain * d, Instance * ins, Plan * p ) const {
     State * currentState = new State( d, ins ); // initial state
 
     bool isValidSeq = runActionSequence( d, p, currentState );
@@ -32,7 +32,7 @@ bool PlanValidator::getVerbose() const {
     return verbose;
 }
 
-bool PlanValidator::runActionSequence( Domain * d, Plan * p, State * currentState ) {
+bool PlanValidator::runActionSequence( Domain * d, Plan * p, State * currentState ) const {
     bool isValidSeq = true;
 
     unsigned actionNum = 1;
@@ -46,7 +46,7 @@ bool PlanValidator::runActionSequence( Domain * d, Plan * p, State * currentStat
         if ( action->holds( currentState, d ) ) {
             action->apply( currentState, d );
             if ( verbose ) {
-                showMsg( "" );    
+                showMsg( "" );
             }
         }
         else {
@@ -60,11 +60,15 @@ bool PlanValidator::runActionSequence( Domain * d, Plan * p, State * currentStat
     return isValidSeq;
 }
 
-void PlanValidator::checkGoal( Domain * d, Instance * ins, State * finalState ) {
+void PlanValidator::checkGoal( Domain * d, Instance * ins, State * finalState ) const {
     if ( finalState->satisfiesGoal( d, ins ) ) {
         showSuccessMsg( "Plan valid" );
     }
     else {
         showErrorMsg( "Goal not satisifed - Plan invalid" );
     }
+}
+
+bool showVerbose() {
+   return PlanValidator::getInstance()->getVerbose();
 }

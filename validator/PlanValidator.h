@@ -16,13 +16,15 @@ protected:
 public:
     static PlanValidator * getInstance();
 
-    void validate( Domain * d, Instance * ins, Plan * p );
+    void validate( Domain * d, Instance * ins, Plan * p ) const;
 
     void setVerbose( bool v );
     bool getVerbose() const;
 
 private:
-    bool runActionSequence( Domain * d, Plan * p, State * currentState );
+    bool runActionSequence( Domain * d, Plan * p, State * currentState ) const;
 
-    void checkGoal( Domain * d, Instance * ins, State * finalState );
+    void checkGoal( Domain * d, Instance * ins, State * finalState ) const;
 };
+
+bool showVerbose();

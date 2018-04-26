@@ -1,5 +1,6 @@
 #include "PlanAction.h"
 #include "Message.h"
+#include "PlanValidator.h"
 
 PlanAction::PlanAction( const std::string& name, const StringVec& params )
     : name( name ), params( params ) {}
@@ -195,21 +196,20 @@ StringVec PlanAction::getObjectParameters( Domain * d, Ground * g ) const {
 
 void PlanAction::applyDeleteList( State * s, const GroundedObjVec& deleteList ) const {
     for ( auto it = deleteList.begin(); it != deleteList.end(); ++it ) {
-        showMsg( "Deleting " + getGroundedObjectStr( *it ) );
+        if ( showVerbose() ) {
+            showMsg( "Deleting " + getGroundedObjectStr( *it ) );
+        }
         s->removeFluent( it->first, it->second );
     }
 }
 
 void PlanAction::applyAddList( State * s, const GroundedObjVec& addList ) const {
     for ( auto it = addList.begin(); it != addList.end(); ++it ) {
-        showMsg( "Adding " + getGroundedObjectStr( *it ) );
+        if ( showVerbose() ) {
+            showMsg( "Adding " + getGroundedObjectStr( *it ) );
+        }
         s->addFluent( it->first, it->second );
     }
-}
-
-bool PlanAction::showVerbose() {
-    // PlanValidator * pv = PlanValidator::getInstance();
-    return false;
 }
 
 std::string getGroundedObjectStr( const GroundedObj& go ) {
