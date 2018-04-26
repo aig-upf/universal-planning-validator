@@ -39,11 +39,8 @@ base.AppendUnique(
 
 base.Append(LIBS=[File(os.path.join(base['pddl_parser_path'], 'lib/libparser.a'))])
 
-# The compilation of the (static & dynamic) library
-build_dirname = 'build'
-base.VariantDir(build_dirname, '.')
-
-validate = base.Program( "validator/validate.bin", ["validator/validate.cpp"] )
+sources = glob.glob( src_path + "/*.cpp" )
+validate = base.Program( "validator/validate.bin", source = sources )
 
 base.AlwaysBuild( validate )
 
@@ -54,4 +51,4 @@ extra.Append(LIBS=[
 ])
 
 # Register the different examples and tests
-SConscript('tests/SConscript', exports='extra')
+#SConscript('tests/SConscript', exports='extra')
