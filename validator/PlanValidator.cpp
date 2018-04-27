@@ -13,6 +13,12 @@ PlanValidator * PlanValidator::getInstance() {
 }
 
 void PlanValidator::validate( Domain * d, Instance * ins, Plan * p ) const {
+    showMsg( "Checking plan: " + p->name );
+
+    if ( verbose ) {
+        showMsg( "Plan Validation details\n-----------------------\n" );
+    }
+
     State * currentState = new State( d, ins ); // initial state
 
     bool isValidSeq = runActionSequence( d, p, currentState );
@@ -52,7 +58,7 @@ bool PlanValidator::runActionSequence( Domain * d, Plan * p, State * currentStat
         else {
             showMsg( "Plan failed because of unsatisfied precondition in:" );
             showMsg( action->getActionName() );
-            showErrorMsg( "Plan failed to execute" );
+            showErrorMsg( "Plan failed to execute\n" );
             isValidSeq = false;
         }
     }
@@ -62,10 +68,10 @@ bool PlanValidator::runActionSequence( Domain * d, Plan * p, State * currentStat
 
 void PlanValidator::checkGoal( Domain * d, Instance * ins, State * finalState ) const {
     if ( finalState->satisfiesGoal( d, ins ) ) {
-        showSuccessMsg( "Plan valid" );
+        showSuccessMsg( "Plan valid\n" );
     }
     else {
-        showErrorMsg( "Goal not satisifed - Plan invalid" );
+        showErrorMsg( "Goal not satisifed - Plan invalid\n" );
     }
 }
 
