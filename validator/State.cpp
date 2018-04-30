@@ -10,11 +10,27 @@ void State::set( Domain * d, Instance * ins ) {
         fluents[pname] = std::set< StringVec >();
     }
 
+    for ( unsigned i = 0; i < d->funcs.size(); ++i ) {
+        const std::string& fname = d->funcs[i]->name;
+        functions[fname] = std::map< StringVec, double >();
+    }
+
     const GroundVec& initialState = ins->init;
     for ( unsigned i = 0; i < initialState.size(); ++i ) {
         const std::string& groundName = initialState[i]->name;
         if ( fluents.find( groundName ) != fluents.end() ) {
             fluents[groundName].insert( d->objectList( initialState[i] ) );
+        }
+        else if ( functions.find( groundName ) != functions.end() ) {
+            GroundFunc<int> * gfi = dynamic_cast< GroundFunc<int> * >( initialState[i] );
+            if ( gfi ) {
+                functions[groundName][d->objectList( initialState[i] )] = gfi->value;
+            }
+
+            GroundFunc<double> * gfd = dynamic_cast< GroundFunc<double> * >( initialState[i] );
+            if ( gfd ) {
+                functions[groundName][d->objectList( initialState[i] )] = gfd->value;
+            }
         }
     }
 }
@@ -40,6 +56,16 @@ void State::removeFluent( const std::string& name, const StringVec& params ) {
     }
 }
 
+void State::modifyFunctionValue( const std::string& name, const StringVec& params, double changeValue ) {
+    if ( functions[name].find( params ) == functions[name].end() ) {
+        std::stringstream ss;
+        ss << name << params;
+        throw InitialFunctionValueUndefined( ss.str() );
+    }
+
+    functions[name][params] += changeValue;
+}
+
 bool State::satisfiesGoal( Domain * d, Instance * ins ) {
     const GroundVec& goalConditions = ins->goal;
     for ( unsigned i = 0; i < goalConditions.size(); ++i ) {
@@ -49,6 +75,18 @@ bool State::satisfiesGoal( Domain * d, Instance * ins ) {
     }
 
     return true;
+}
+
+double State::getTotalCostValue() const {
+    auto totalCostIt = functions.find( "TOTAL-COST" );
+    if ( totalCostIt != functions.end() ) {
+        auto totalCostParamsIt = totalCostIt->second.find( StringVec() ); // empty params
+        if ( totalCostParamsIt != totalCostIt->second.end() ) {
+            return totalCostParamsIt->second;
+        }
+    }
+
+    throw TotalCostFunctionUndefined();
 }
 
 std::set< StringVec >& State::getActiveFluents( const std::string& name ) {

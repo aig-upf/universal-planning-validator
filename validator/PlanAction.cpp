@@ -15,14 +15,17 @@ bool PlanAction::holds( State * s, Domain * d ) {
     return false;
 }
 
-void PlanAction::apply( State * s, Domain * d ) {
+void PlanAction::apply( State * s, Domain * d, Instance * ins ) {
     Action * a = d->actions.get( name );
     if ( a ) {
         GroundedObjVec addList, deleteList;
-        applyRec( s, d, a->eff, addList, deleteList );
+        FunctionModifierObjVec funcList; // list of changed functions
+
+        applyRec( s, d, ins, a->eff, addList, deleteList, funcList );
 
         applyDeleteList( s, deleteList );
         applyAddList( s, addList );
+        applyFuncList( s, funcList );
     }
 }
 
@@ -127,11 +130,11 @@ bool PlanAction::existsHoldsRec( const StringVec& existsParams, unsigned paramIn
     return false;
 }
 
-void PlanAction::applyRec( State * s, Domain * d, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList ) {
+void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList ) {
     And * a = dynamic_cast< And * >( c );
     if ( a ) {
         for ( unsigned i = 0; i < a->conds.size(); ++i ) {
-            applyRec( s, d, a->conds[i], addList, deleteList );
+            applyRec( s, d, ins, a->conds[i], addList, deleteList, funcList );
         }
     }
 
@@ -149,37 +152,55 @@ void PlanAction::applyRec( State * s, Domain * d, Condition * c, GroundedObjVec&
     Forall * f = dynamic_cast< Forall * >( c );
     if ( f ) {
         StringVec forallParams = d->typeList( f );
-        forallApplyRec( forallParams, 0, s, d, f->cond, addList, deleteList );
+        forallApplyRec( forallParams, 0, s, d, ins, f->cond, addList, deleteList, funcList );
     }
 
     When * w = dynamic_cast< When * >( c );
     if ( w ) {
         bool conditionHolds = holdsRec( s, d, w->pars );
         if ( conditionHolds ) {
-            applyRec( s, d, w->cond, addList, deleteList );
+            applyRec( s, d, ins, w->cond, addList, deleteList, funcList );
         }
+    }
+
+    FunctionModifier * fm = dynamic_cast< FunctionModifier * >( c );
+    if ( fm ) {
+        std::string functionName = fm->modifiedGround ? fm->modifiedGround->name : "TOTAL-COST";
+        StringVec functionParameters = getObjectParameters( d, fm->modifiedGround );
+        double changedValue = fm->modifierExpr->evaluate( *ins, params );
+
+        if ( dynamic_cast< Decrease * >( fm ) ) {
+            changedValue *= -1.0;
+        }
+
+        funcList.push_back( FunctionModifierObj( functionName, functionParameters, changedValue ) );
     }
 }
 
-void PlanAction::forallApplyRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList ) {
+void PlanAction::forallApplyRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList ) {
     if ( paramIndex < forallParams.size() ) {
         Type * type = d->getType( forallParams[paramIndex] );
 
         for ( unsigned i = 0; i < type->noObjects(); ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
             params.push_back( typeObj.first );  // expand action params
-            forallApplyRec( forallParams, paramIndex + 1, s, d, c, addList, deleteList );
+            forallApplyRec( forallParams, paramIndex + 1, s, d, ins, c, addList, deleteList, funcList );
             params.pop_back();  // remove previously added params
         }
     }
     else {
         // all forall parameters instantiated and added to action params,
         // continue checking satisfiability
-        applyRec( s, d, c, addList, deleteList );
+        applyRec( s, d, ins, c, addList, deleteList, funcList );
     }
 }
 
 StringVec PlanAction::getObjectParameters( Domain * d, Ground * g ) const {
+    if ( !g ) {
+        // can happen when incrementing or decrementing TOTAL-COST
+        return StringVec();
+    }
+
     IntVec& groundParams = g->params;
     StringVec objParams;
     for ( unsigned i = 0; i < groundParams.size(); ++i ) {
@@ -209,6 +230,15 @@ void PlanAction::applyAddList( State * s, const GroundedObjVec& addList ) const 
             showMsg( "Adding " + getGroundedObjectStr( *it ) );
         }
         s->addFluent( it->first, it->second );
+    }
+}
+
+void PlanAction::applyFuncList( State * s, const FunctionModifierObjVec& funcList ) const {
+    for ( auto it = funcList.begin(); it != funcList.end(); ++it ) {
+        if ( showVerbose() ) {
+            showMsg( "Updating (" + it->fname + ")" );
+        }
+        s->modifyFunctionValue( it->fname, it->fparams, it->changedValue );
     }
 }
 
