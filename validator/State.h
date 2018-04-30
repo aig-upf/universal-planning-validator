@@ -5,22 +5,16 @@
 
 using namespace parser::pddl;
 
-class FluentNotFound : public std::runtime_error {
+class UndefinedFluent : public std::runtime_error {
 public:
-    FluentNotFound( const std::string& fluent )
+    UndefinedFluent( const std::string& fluent )
         : std::runtime_error( "Fluent " + fluent + " is undefined" ) {}
 };
 
-class InitialFunctionValueUndefined : public std::runtime_error {
+class UndefinedFunctionValue : public std::runtime_error {
 public:
-    InitialFunctionValueUndefined( const std::string& name )
-        : std::runtime_error( "Function " + name + " is not defined in the initial state" ) {}
-};
-
-class TotalCostFunctionUndefined : public std::runtime_error {
-public:
-    TotalCostFunctionUndefined()
-        : std::runtime_error( "Undefined TOTAL-COST function" ) {};
+    UndefinedFunctionValue( const std::string& name )
+        : std::runtime_error( "Function " + name + " is not defined" ) {}
 };
 
 class State {
@@ -45,6 +39,8 @@ public:
     bool satisfiesGoal( Domain * d, Instance * ins );
 
     double getTotalCostValue() const;
+
+    double getValueForFunction( const std::string& name, const StringVec& params ) const;
 
 protected:
     std::set< StringVec >& getActiveFluents( const std::string& name );

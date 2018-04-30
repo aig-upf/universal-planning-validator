@@ -236,10 +236,18 @@ void PlanAction::applyAddList( State * s, const GroundedObjVec& addList ) const 
 void PlanAction::applyFuncList( State * s, const FunctionModifierObjVec& funcList ) const {
     for ( auto it = funcList.begin(); it != funcList.end(); ++it ) {
         if ( showVerbose() ) {
-            showMsg( "Updating (" + it->fname + ")" );
+            showFunctionValueUpdateMsg( s, *it );
         }
         s->modifyFunctionValue( it->fname, it->fparams, it->changedValue );
     }
+}
+
+void PlanAction::showFunctionValueUpdateMsg( State * s, const FunctionModifierObj& fmo ) const {
+    std::stringstream ss;
+    ss << "Updating " << getFunctionModifierObjectStr( fmo );
+    ss << " (" << s->getValueForFunction( fmo.fname, fmo.fparams ) << ") ";
+    ss << "by " << fmo.changedValue << " increase";
+    showMsg( ss.str() );
 }
 
 std::string getGroundedObjectStr( const GroundedObj& go ) {
@@ -247,6 +255,16 @@ std::string getGroundedObjectStr( const GroundedObj& go ) {
     ss << "(" << go.first;
     for ( unsigned i = 0; i < go.second.size(); ++i ) {
         ss << " " << go.second[i];
+    }
+    ss << ")";
+    return ss.str();
+}
+
+std::string getFunctionModifierObjectStr( const FunctionModifierObj& fmo ) {
+    std::stringstream ss;
+    ss << "(" << fmo.fname;
+    for ( unsigned i = 0; i < fmo.fparams.size(); ++i ) {
+        ss << " " << fmo.fparams[i];
     }
     ss << ")";
     return ss.str();

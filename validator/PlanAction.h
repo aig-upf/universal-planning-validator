@@ -58,6 +58,9 @@ protected:
     void applyAddList( State * s, const GroundedObjVec& addList ) const;
 
     void applyFuncList( State * s, const FunctionModifierObjVec& funcList ) const;
+
+    void showFunctionValueUpdateMsg( State * s, const FunctionModifierObj& fmo ) const;
 };
 
 std::string getGroundedObjectStr( const GroundedObj& go );
+std::string getFunctionModifierObjectStr( const FunctionModifierObj& fmo );

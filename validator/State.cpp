@@ -60,7 +60,7 @@ void State::modifyFunctionValue( const std::string& name, const StringVec& param
     if ( functions[name].find( params ) == functions[name].end() ) {
         std::stringstream ss;
         ss << name << params;
-        throw InitialFunctionValueUndefined( ss.str() );
+        throw UndefinedFunctionValue( ss.str() );
     }
 
     functions[name][params] += changeValue;
@@ -78,15 +78,21 @@ bool State::satisfiesGoal( Domain * d, Instance * ins ) {
 }
 
 double State::getTotalCostValue() const {
-    auto totalCostIt = functions.find( "TOTAL-COST" );
-    if ( totalCostIt != functions.end() ) {
-        auto totalCostParamsIt = totalCostIt->second.find( StringVec() ); // empty params
-        if ( totalCostParamsIt != totalCostIt->second.end() ) {
-            return totalCostParamsIt->second;
+    return getValueForFunction( "TOTAL-COST", StringVec() );
+}
+
+double State::getValueForFunction( const std::string& name, const StringVec& params ) const {
+    auto functionIt = functions.find( name );
+    if ( functionIt != functions.end() ) {
+        auto functionParamsIt = functionIt->second.find( params );
+        if ( functionParamsIt != functionIt->second.end() ) {
+            return functionParamsIt->second;
         }
     }
 
-    throw TotalCostFunctionUndefined();
+    std::stringstream ss;
+    ss << name << params;
+    throw UndefinedFunctionValue( ss.str() );
 }
 
 std::set< StringVec >& State::getActiveFluents( const std::string& name ) {
@@ -96,6 +102,6 @@ std::set< StringVec >& State::getActiveFluents( const std::string& name ) {
         return fluentSet->second;
     }
     else {
-        throw FluentNotFound( name );
+        throw UndefinedFluent( name );
     }
 }
