@@ -49,6 +49,12 @@ bool PlanAction::holdsRec( State * s, Domain * d, Condition * c ) {
         }
     }
 
+    Equals * eq = dynamic_cast< Equals * >( c );
+    if ( eq ) {
+        StringVec objParams = getObjectParameters( d, eq );
+        return objParams[0] == objParams[1];
+    }
+
     Ground * g = dynamic_cast< Ground * >( c );
     if ( g ) {
         if ( !s->holds( false, g->name, getObjectParameters( d, g ) ) ) {
@@ -58,10 +64,7 @@ bool PlanAction::holdsRec( State * s, Domain * d, Condition * c ) {
 
     Not * n = dynamic_cast< Not * >( c );
     if ( n ) {
-        Ground * ng = n->cond;
-        if ( !s->holds( true, ng->name, getObjectParameters( d, ng ) ) ) {
-            return false;
-        }
+        return !holdsRec( s, d, n->cond );
     }
 
     Forall * f = dynamic_cast< Forall * >( c );
