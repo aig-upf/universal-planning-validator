@@ -34,3 +34,4 @@
 *.sconsign.dblite
 validator/validate
 *bin
+build

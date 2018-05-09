@@ -34,21 +34,26 @@ if platform.system() == "Darwin":
 
 base.AppendUnique(
 	CPPPATH = [ os.path.abspath(p) for p in include_paths ],
-	CXXFLAGS= ["-Wall", "-pedantic", "-std=c++11", "-g"]
+	CXXFLAGS= ["-Wall", "-pedantic", "-std=c++11", "-g"],
+    LIBS=[File(os.path.join(base['pddl_parser_path'], 'lib/libparser.a'))]
 )
 
-base.Append(LIBS=[File(os.path.join(base['pddl_parser_path'], 'lib/libparser.a'))])
+build_dirname = "build"
+base.VariantDir(build_dirname, '.')
 
 sources = glob.glob( src_path + "/*.cpp" )
+build_files = [build_dirname + "/" + src for src in sources]
+
+static_lib = base.Library('lib/validator', build_files)
 validate = base.Program( "validator/validate.bin", source = sources )
 
-base.AlwaysBuild( validate )
+base.AlwaysBuild( [validate, static_lib] )
 
 extra = base.Clone()
-
 extra.Append(LIBS=[
-	File(base['pddl_parser_path'] + '/lib/libparser.a')
+	File(base['pddl_parser_path'] + '/lib/libparser.a'),
+    File(os.path.abspath('./lib/libvalidator.a'))
 ])
 
 # Register the different examples and tests
-#SConscript('tests/SConscript', exports='extra')
+SConscript('tests/SConscript', exports='extra')
