@@ -44,4 +44,5 @@ public:
 
 protected:
     std::set< StringVec >& getActiveFluents( const std::string& name );
+    void addTotalCostFunction();
 };

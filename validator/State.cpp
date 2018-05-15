@@ -33,6 +33,10 @@ void State::set( Domain * d, Instance * ins ) {
             }
         }
     }
+
+    if ( d->costs ) {
+        addTotalCostFunction(); // add TOTAL-COST function if does not exist
+    }
 }
 
 bool State::holds( bool neg, const std::string& name, const StringVec& params ) {
@@ -103,5 +107,18 @@ std::set< StringVec >& State::getActiveFluents( const std::string& name ) {
     }
     else {
         throw UndefinedFluent( name );
+    }
+}
+
+void State::addTotalCostFunction() {
+    auto totalCostFunction = functions.find( "TOTAL-COST" );
+    if ( totalCostFunction == functions.end() ) {
+        functions["TOTAL-COST"] = std::map< StringVec, double >();
+    }
+
+    StringVec totalCostParams;
+    auto totalCostParamsIt = functions["TOTAL-COST"].find( totalCostParams );
+    if ( totalCostParamsIt == functions["TOTAL-COST"].end() ) {
+        functions["TOTAL-COST"][totalCostParams] = 0.0;
     }
 }
