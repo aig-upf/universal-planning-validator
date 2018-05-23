@@ -90,15 +90,19 @@ bool PlanAction::holdsRec( State * s, Domain * d, Condition * c ) {
 bool PlanAction::forallHoldsRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
     if ( paramIndex < forallParams.size() ) {
         Type * type = d->getType( forallParams[paramIndex] );
+        long numObjects = type->noObjects();
 
-        for ( unsigned i = 0; i < type->noObjects(); ++i ) {
+        for ( long i = -numObjects; i < numObjects; ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
-            params.push_back( typeObj.first );  // expand action params
-            bool result = forallHoldsRec( forallParams, paramIndex + 1, s, d, c );
-            params.pop_back();  // remove previously added params
 
-            if ( !result ) {
-                return false;
+            if ( !typeObj.first.empty() ) {
+                params.push_back( typeObj.first );  // expand action params
+                bool result = forallHoldsRec( forallParams, paramIndex + 1, s, d, c );
+                params.pop_back();  // remove previously added params
+
+                if ( !result ) {
+                    return false;
+                }
             }
         }
     }
@@ -114,15 +118,19 @@ bool PlanAction::forallHoldsRec( const StringVec& forallParams, unsigned paramIn
 bool PlanAction::existsHoldsRec( const StringVec& existsParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
     if ( paramIndex < existsParams.size() ) {
         Type * type = d->getType( existsParams[paramIndex] );
+        long numObjects = type->noObjects();
 
-        for ( unsigned i = 0; i < type->noObjects(); ++i ) {
+        for ( long i = -numObjects; i < numObjects; ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
-            params.push_back( typeObj.first );  // expand action params
-            bool result = existsHoldsRec( existsParams, paramIndex + 1, s, d, c );
-            params.pop_back();  // remove previously added params
 
-            if ( result ) {
-                return true;
+            if ( !typeObj.first.empty() ) {
+                params.push_back( typeObj.first );  // expand action params
+                bool result = existsHoldsRec( existsParams, paramIndex + 1, s, d, c );
+                params.pop_back();  // remove previously added params
+
+                if ( result ) {
+                    return true;
+                }    
             }
         }
     }
@@ -183,12 +191,16 @@ void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c,
 void PlanAction::forallApplyRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList ) {
     if ( paramIndex < forallParams.size() ) {
         Type * type = d->getType( forallParams[paramIndex] );
+        long numObjects = type->noObjects();
 
-        for ( unsigned i = 0; i < type->noObjects(); ++i ) {
+        for ( long i = -numObjects; i < numObjects; ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
-            params.push_back( typeObj.first );  // expand action params
-            forallApplyRec( forallParams, paramIndex + 1, s, d, ins, c, addList, deleteList, funcList );
-            params.pop_back();  // remove previously added params
+
+            if ( !typeObj.first.empty() ) {
+                params.push_back( typeObj.first );  // expand action params
+                forallApplyRec( forallParams, paramIndex + 1, s, d, ins, c, addList, deleteList, funcList );
+                params.pop_back();  // remove previously added params
+            }
         }
     }
     else {
