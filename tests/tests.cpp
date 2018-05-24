@@ -19,6 +19,7 @@ public:
         TEST_CASE( orTest );
         TEST_CASE( whenTest );
         TEST_CASE( citycarTest );
+        TEST_CASE( cellularAutomataTest );
     }
 
     template < typename T >
@@ -89,6 +90,13 @@ public:
         parser::pddl::Domain d( "tests/classical/citycar/dom.pddl" );
         parser::pddl::Instance ins( d, "tests/classical/citycar/ins.pddl" );
         Plan p( "tests/classical/citycar/plan.1" );
+        callValidator( &d, &ins, &p );
+    }
+
+    void cellularAutomataTest() {
+        parser::pddl::Domain d( "tests/classical/cellular-automata/dom.pddl" );
+        parser::pddl::Instance ins( d, "tests/classical/cellular-automata/ins.pddl" );
+        Plan p( "tests/classical/cellular-automata/plan.1" );
         callValidator( &d, &ins, &p );
     }
 };

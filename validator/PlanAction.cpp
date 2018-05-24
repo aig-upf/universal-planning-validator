@@ -90,9 +90,11 @@ bool PlanAction::holdsRec( State * s, Domain * d, Condition * c ) {
 bool PlanAction::forallHoldsRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
     if ( paramIndex < forallParams.size() ) {
         Type * type = d->getType( forallParams[paramIndex] );
-        long numObjects = type->noObjects();
 
-        for ( long i = -numObjects; i < numObjects; ++i ) {
+        long numConstants = type->noConstants();
+        long numObjects = type->noObjects() - numConstants;
+
+        for ( long i = -numConstants; i < numObjects; ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
 
             if ( !typeObj.first.empty() ) {
@@ -118,9 +120,11 @@ bool PlanAction::forallHoldsRec( const StringVec& forallParams, unsigned paramIn
 bool PlanAction::existsHoldsRec( const StringVec& existsParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
     if ( paramIndex < existsParams.size() ) {
         Type * type = d->getType( existsParams[paramIndex] );
-        long numObjects = type->noObjects();
 
-        for ( long i = -numObjects; i < numObjects; ++i ) {
+        long numConstants = type->noConstants();
+        long numObjects = type->noObjects() - numConstants;
+
+        for ( long i = -numConstants; i < numObjects; ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
 
             if ( !typeObj.first.empty() ) {
@@ -130,7 +134,7 @@ bool PlanAction::existsHoldsRec( const StringVec& existsParams, unsigned paramIn
 
                 if ( result ) {
                     return true;
-                }    
+                }
             }
         }
     }
@@ -191,9 +195,11 @@ void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c,
 void PlanAction::forallApplyRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList ) {
     if ( paramIndex < forallParams.size() ) {
         Type * type = d->getType( forallParams[paramIndex] );
-        long numObjects = type->noObjects();
 
-        for ( long i = -numObjects; i < numObjects; ++i ) {
+        long numConstants = type->noConstants();
+        long numObjects = type->noObjects() - numConstants;
+
+        for ( long i = -numConstants; i < numObjects; ++i ) {
             std::pair< std::string, int > typeObj = type->object( i );
 
             if ( !typeObj.first.empty() ) {
