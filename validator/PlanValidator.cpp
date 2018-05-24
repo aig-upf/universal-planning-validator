@@ -19,9 +19,9 @@ void PlanValidator::validate( Domain * d, Instance * ins, Plan * p ) const {
         showMsg( "Plan Validation details\n-----------------------\n" );
     }
 
-    State * currentState = new State( d, ins ); // initial state
+    State * currentState = new State( d, ins );
 
-    bool isValidSeq = runActionSequence( d, ins, p, currentState );
+    bool isValidSeq = p->run( d, ins, currentState );
     if ( isValidSeq ) {
         showMsg( "Plan executed successfully - checking goal" );
         checkGoal( d, ins, p, currentState );
@@ -36,34 +36,6 @@ void PlanValidator::setVerbose( bool v ) {
 
 bool PlanValidator::getVerbose() const {
     return verbose;
-}
-
-bool PlanValidator::runActionSequence( Domain * d, Instance * ins, Plan * p, State * currentState ) const {
-    bool isValidSeq = true;
-
-    unsigned actionNum = 1;
-    auto action = p->actions.begin();
-
-    for ( ; isValidSeq && action != p->actions.end(); ++action, ++actionNum ) {
-        if ( verbose ) {
-            showMsg( "Checking next happening (time " + std::to_string( actionNum ) + ")" );
-        }
-
-        if ( action->holds( currentState, d ) ) {
-            action->apply( currentState, d, ins );
-            if ( verbose ) {
-                showMsg( "" );
-            }
-        }
-        else {
-            showMsg( "Plan failed because of unsatisfied precondition in:" );
-            showMsg( action->getActionName() );
-            showErrorMsg( "Error: Plan failed to execute\n" );
-            isValidSeq = false;
-        }
-    }
-
-    return isValidSeq;
 }
 
 void PlanValidator::checkGoal( Domain * d, Instance * ins, Plan * p, State * finalState ) const {
@@ -81,7 +53,7 @@ double PlanValidator::getPlanCost( Domain * d, Plan * p, State * finalState ) co
         return finalState->getTotalCostValue();
     }
 
-    return p->actions.size();
+    return p->getNumActions();
 }
 
 bool showVerbose() {

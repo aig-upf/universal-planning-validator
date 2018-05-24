@@ -22,8 +22,6 @@ public:
     bool getVerbose() const;
 
 private:
-    bool runActionSequence( Domain * d, Instance * ins, Plan * p, State * currentState ) const;
-
     void checkGoal( Domain * d, Instance * ins, Plan * p, State * finalState ) const;
 
     double getPlanCost( Domain * d, Plan * p, State * finalState ) const;

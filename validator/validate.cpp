@@ -3,6 +3,7 @@
 #include <parser/Instance.h>
 #include "Plan.h"
 #include "PlanValidator.h"
+#include "ClassicalPlan.h"
 
 using namespace parser::pddl;
 
@@ -66,11 +67,13 @@ int main( int argc, char * argv[] ) {
 
     Domain d( pp.domain );
     Instance ins( d, pp.ins );
-    Plan p( pp.plan );
+    Plan * p = new ClassicalPlan( pp.plan );
 
     PlanValidator * pv = PlanValidator::getInstance();
     pv->setVerbose( pp.verbose );
-    pv->validate( &d, &ins, &p );
+    pv->validate( &d, &ins, p );
+
+    delete p;
 
     return 0;
 }

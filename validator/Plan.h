@@ -3,28 +3,26 @@
 #include <parser/Instance.h>
 #include <parser/Filereader.h>
 
-#include "PlanAction.h"
+#include "State.h"
 
 using namespace parser::pddl;
 
 class Plan {
 public:
     std::string name;
-    std::vector< PlanAction > actions;
 
-    Plan();
-    Plan( const std::string & s );
+    virtual ~Plan() {}
 
-    void parse( const std::string & s );
+    virtual void parse( const std::string & s ) = 0;
+
+    // runs plan and returns if it could be completed
+    virtual bool run( Domain * d, Instance * ins, State * currentState ) = 0;
+
+    virtual unsigned getNumActions() const = 0;
 
     friend std::ostream& operator<<( std::ostream& os, const Plan& p ) {
         return p.print( os );
     }
 
-    virtual std::ostream& print( std::ostream& stream ) const {
-        for ( unsigned i = 0; i < actions.size(); ++i ) {
-            stream << actions[i];
-        }
-        return stream;
-    }
+    virtual std::ostream& print( std::ostream& stream ) const = 0;
 };

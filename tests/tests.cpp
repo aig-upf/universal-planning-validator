@@ -6,6 +6,7 @@
 #include <parser/Instance.h>
 #include <validator/PlanValidator.h>
 #include <validator/Plan.h>
+#include <validator/ClassicalPlan.h>
 
 class ClassicalPlanningTests : public TestFixture<ClassicalPlanningTests>
 {
@@ -47,56 +48,56 @@ public:
     void elevatorTest() {
         parser::pddl::Domain d( "tests/classical/elevator/dom.pddl");
         parser::pddl::Instance ins( d, "tests/classical/elevator/ins.pddl" );
-        Plan p( "tests/classical/elevator/plan.1" );
+        ClassicalPlan p( "tests/classical/elevator/plan.1" );
         callValidator( &d, &ins, &p );
     }
 
     void existsTest() {
         parser::pddl::Domain d( "tests/classical/exists/dom.pddl");
         parser::pddl::Instance ins( d, "tests/classical/exists/ins.pddl" );
-        Plan p( "tests/classical/exists/plan.1" );
+        ClassicalPlan p( "tests/classical/exists/plan.1" );
         callValidator( &d, &ins, &p );
     }
 
     void forallTest1() {
         parser::pddl::Domain d( "tests/classical/forall/dom.pddl");
         parser::pddl::Instance ins( d, "tests/classical/forall/ins.pddl" );
-        Plan p( "tests/classical/forall/plan.1" );
+        ClassicalPlan p( "tests/classical/forall/plan.1" );
         callValidator( &d, &ins, &p );
     }
 
     void forallTest2() {
         parser::pddl::Domain d( "tests/classical/forall/dom.pddl");
         parser::pddl::Instance ins( d, "tests/classical/forall/ins.pddl" );
-        Plan p( "tests/classical/forall/plan.2" );
+        ClassicalPlan p( "tests/classical/forall/plan.2" );
         callValidator( &d, &ins, &p );
     }
 
     void orTest() {
         parser::pddl::Domain d( "tests/classical/or/dom.pddl");
         parser::pddl::Instance ins( d, "tests/classical/or/ins.pddl" );
-        Plan p( "tests/classical/or/plan.1" );
+        ClassicalPlan p( "tests/classical/or/plan.1" );
         callValidator( &d, &ins, &p );
     }
 
     void whenTest() {
         parser::pddl::Domain d( "tests/classical/when/dom.pddl");
         parser::pddl::Instance ins( d, "tests/classical/when/ins.pddl" );
-        Plan p( "tests/classical/when/plan.1" );
+        ClassicalPlan p( "tests/classical/when/plan.1" );
         callValidator( &d, &ins, &p );
     }
 
     void citycarTest() {
         parser::pddl::Domain d( "tests/classical/citycar/dom.pddl" );
         parser::pddl::Instance ins( d, "tests/classical/citycar/ins.pddl" );
-        Plan p( "tests/classical/citycar/plan.1" );
+        ClassicalPlan p( "tests/classical/citycar/plan.1" );
         callValidator( &d, &ins, &p );
     }
 
     void cellularAutomataTest() {
         parser::pddl::Domain d( "tests/classical/cellular-automata/dom.pddl" );
         parser::pddl::Instance ins( d, "tests/classical/cellular-automata/ins.pddl" );
-        Plan p( "tests/classical/cellular-automata/plan.1" );
+        ClassicalPlan p( "tests/classical/cellular-automata/plan.1" );
         callValidator( &d, &ins, &p );
     }
 };
