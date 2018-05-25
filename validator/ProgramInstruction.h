@@ -14,6 +14,13 @@ public:
     virtual InstructionResult run( Domain * d, Instance * ins, State * currentState ) = 0;
 };
 
+struct ProgramInstructionCmp {
+    inline bool operator() (const ProgramInstruction * lhs, const ProgramInstruction * rhs) {
+        return lhs->line < rhs->line;
+    }
+};
+
+
 class ActionInstruction : public ProgramInstruction {
 public:
     std::string name;

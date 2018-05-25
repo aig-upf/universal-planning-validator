@@ -83,6 +83,8 @@ void PlanningProgram::parse( const std::string & s ) {
         getline( f.f, f.s );
     }
 
+    std::sort( instructions.begin(), instructions.end(), ProgramInstructionCmp() );
+
     name = s;
 }
 
