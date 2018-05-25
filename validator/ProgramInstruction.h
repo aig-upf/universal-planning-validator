@@ -20,7 +20,6 @@ struct ProgramInstructionCmp {
     }
 };
 
-
 class ActionInstruction : public ProgramInstruction {
 public:
     std::string name;

@@ -7,6 +7,7 @@
 #include <validator/PlanValidator.h>
 #include <validator/Plan.h>
 #include <validator/ClassicalPlan.h>
+#include <validator/PlanningProgram.h>
 
 class ClassicalPlanningTests : public TestFixture<ClassicalPlanningTests>
 {
@@ -102,4 +103,43 @@ public:
     }
 };
 
+class PlanningProgramsTests : public TestFixture<PlanningProgramsTests>
+{
+public:
+    TEST_FIXTURE( PlanningProgramsTests )
+    {
+        TEST_CASE( summatoryTest );
+    }
+
+    template < typename T >
+    void checkEqual( T & prob, const std::string & file ) {
+        std::ifstream f(file.c_str());
+        if (!f) throw std::runtime_error(std::string("Failed to open file '") + file + "'");
+        std::string s, t;
+
+        while(std::getline(f, s)){
+            t += s + "\n";
+        }
+
+        std::ostringstream ds;
+        ds << prob;
+        ASSERT_EQUALS( t, ds.str() );
+        std::ofstream of("ins.txt");
+        of<<ds.str();
+    }
+
+    void callValidator( Domain * d, Instance * ins, Plan * p ) {
+        PlanValidator * pv = PlanValidator::getInstance();
+        pv->validate( d, ins, p );
+    }
+
+    void summatoryTest() {
+        parser::pddl::Domain d( "tests/planning-programs/summatory/dom.pddl");
+        parser::pddl::Instance ins( d, "tests/planning-programs/summatory/sumatory21.pddl" );
+        PlanningProgram p( "tests/planning-programs/summatory/program.txt" );
+        callValidator( &d, &ins, &p );
+    }
+};
+
 REGISTER_FIXTURE( ClassicalPlanningTests )
+REGISTER_FIXTURE( PlanningProgramsTests )
