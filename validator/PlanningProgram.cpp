@@ -6,8 +6,17 @@ PlanningProgram::PlanningProgram( const std::string & s ) {
     parse( s );
 }
 
+PlanningProgram::~PlanningProgram() {
+    for ( unsigned i = 0; i < instructions.size(); ++i ) {
+        delete instructions[i];
+    }
+}
+
 void PlanningProgram::parse( const std::string & s ) {
     Filereader f( s );
+
+    std::map< unsigned, GotoInstruction * > pendingGotos; // <line, goto>
+    std::map< unsigned, GotoConditionInstruction * > pendingGotoConds;
 
     while ( !f.f.eof() && !f.s.empty() ) {
         f.c = 0;
@@ -17,29 +26,57 @@ void PlanningProgram::parse( const std::string & s ) {
 
         if ( startsWith( instrName, END_PREFIX ) ) {
             f.next();
-            std::string stackRow = f.getToken();
-            std::cout << instrName << " " << stackRow << "\n";
+            f.getToken(); // ignore stack row, useless for validation
+
+            ProgramInstruction * instr = new EndInstruction( instrName );
+            instructions.push_back( instr );
         }
         else if ( startsWith( instrName, INSTR_PREFIX ) ) {
             f.next();
-            std::string stackRow = f.getToken();
-            std::cout << instrName << " " << stackRow << "\n";
+            f.getToken(); // ignore stack row, useless for validation
+
+            ProgramInstruction * instr = new ActionInstruction( instrName );
+            instructions.push_back( instr );
         }
         else if ( startsWith( instrName, GOTO_PREFIX ) ) {
-            std::cout << instrName << "\n";
+            GotoInstruction * instr = new GotoInstruction( instrName );
+            instructions.push_back( instr );
+
+            auto pendingCond = pendingGotoConds.find( instr->line );
+            if ( pendingCond == pendingGotoConds.end() ) {
+                pendingGotos[instr->line] = instr;
+            }
+            else {
+                instr->condition = pendingCond->second;
+                pendingGotoConds.erase( pendingCond );
+            }
         }
-        else if ( startsWith( instrName, COND_ASSIGN_PREFIX ) ) {
-            f.next();
+        else if ( startsWith( instrName, GOTO_COND_PREFIX ) ) {
+            StringVec instrParams;
 
-            std::string variableName = f.getToken();
-            f.next();
+            bool allParamsRead = false;
+            while ( !allParamsRead ) {
+                f.next();
+                std::string currentParam = f.getToken();
 
-            std::string variableVal = f.getToken();
-            f.next();
+                if ( startsWith( currentParam, "ROW-" ) ) {
+                    allParamsRead = true;
+                }
+                else {
+                    instrParams.push_back( currentParam );
+                }
+            }
 
-            std::string stackRow = f.getToken();
+            GotoConditionInstruction * instr = new GotoConditionInstruction( instrName, instrParams );
 
-            std::cout << instrName << " " << variableName << " " << variableVal << " " << stackRow << "\n";
+            auto pendingGoto = pendingGotos.find( instr->line );
+            if ( pendingGoto == pendingGotos.end() ) {
+                pendingGotoConds[instr->line] = instr;
+            }
+            else {
+                pendingGoto->second->condition = instr;
+                pendingGotos.erase( pendingGoto );
+            }
         }
 
         ++f.r;
@@ -50,7 +87,24 @@ void PlanningProgram::parse( const std::string & s ) {
 }
 
 bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
-    return false;
+    if ( instructions.empty() ) {
+        // error
+    }
+
+    unsigned currentLine = 0;
+
+    while ( currentLine >= 0 && currentLine < instructions.size() ) {
+        ProgramInstruction * pi = instructions[currentLine];
+        InstructionResult result = pi->run( d, ins, currentState );
+        if ( result.first ) {
+            currentLine = result.second;
+        }
+        else {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 unsigned PlanningProgram::getNumActions() const {
