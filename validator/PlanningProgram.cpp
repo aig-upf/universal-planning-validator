@@ -78,6 +78,13 @@ void PlanningProgram::parse( const std::string & s ) {
                 pendingGotos.erase( pendingGoto );
             }
         }
+        else if ( startsWith( instrName, CALL_PREFIX ) ) {
+            f.next();
+            f.getToken(); // ignore stack row, useless for validation
+
+            ProgramInstruction * instr = new CallInstruction( instrName );
+            instructions.push_back( instr );
+        }
 
         ++f.r;
         getline( f.f, f.s );

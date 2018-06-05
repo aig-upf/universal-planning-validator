@@ -15,6 +15,7 @@ public:
     const std::string GOTO_PREFIX = "GOTO-";
     const std::string GOTO_COND_PREFIX = "COND-";
     const std::string END_PREFIX = "INS-END-";
+    const std::string CALL_PREFIX = "CALL-";
 
     std::vector< ProgramInstruction * > instructions;
 
