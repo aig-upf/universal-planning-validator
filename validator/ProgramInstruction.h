@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 #include "PlanAction.h"
 
 typedef std::pair< bool, long > InstructionResult;
@@ -27,8 +29,26 @@ public:
     ActionInstruction( const std::string& instr ) {
         long firstDash = instr.find( '-' );
         long lastDash = instr.rfind( '-' );
+        long penultimateDash = instr.substr( 0, lastDash ).rfind( '-' );
 
-        name = instr.substr( firstDash + 1, lastDash - firstDash - 1 );
+        bool existsProcedureId = false;
+        std::string procedureIdStr = instr.substr( penultimateDash + 1, lastDash - penultimateDash - 1 );
+
+        try {
+            procedureId = std::stoi( procedureIdStr );
+            existsProcedureId = true;
+        }
+        catch ( const std::invalid_argument& ia ) {
+            procedureId = 0;  // only one procedure exists!
+        }
+
+        if ( existsProcedureId ) {
+            name = instr.substr( firstDash + 1, penultimateDash - firstDash - 1 );
+        }
+        else {
+            name = instr.substr( firstDash + 1, lastDash - firstDash - 1 );
+        }
+
         line = std::stoi( instr.substr( lastDash + 1, instr.length() - lastDash ) );
     }
 
@@ -108,7 +128,17 @@ public:
 class EndInstruction : public ProgramInstruction {
 public:
     EndInstruction( const std::string& instr ) {
+        long firstDash = instr.find( '-' );
         long lastDash = instr.rfind( '-' );
+        long penultimateDash = instr.substr( 0, lastDash ).rfind( '-' );
+
+        if ( firstDash == penultimateDash ) {
+            procedureId = -1; // the end for the global program, not necessarily 0!!!
+        }
+        else {
+            procedureId = std::stoi( instr.substr( penultimateDash + 1, lastDash - penultimateDash - 1 ) );
+        }
+
         line = std::stoi( instr.substr( lastDash + 1, instr.length() - lastDash - 1 ) );
     }
 
