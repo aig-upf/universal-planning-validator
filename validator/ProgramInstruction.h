@@ -101,6 +101,8 @@ public:
     }
 
     InstructionResult run( Domain * d, Instance * ins, State * currentState ) {
+        // Derived * de = d->derived.get( predicateName );
+
         bool result = currentState->holds( false, predicateName, predicateParams );
         return InstructionResult( result, procedureId, line );
     }

@@ -1,6 +1,8 @@
 #include "PlanAction.h"
 #include "Message.h"
 #include "PlanValidator.h"
+#include "ConditionChecker.h"
+#include "Utils.h"
 
 PlanAction::PlanAction( const std::string& name, const StringVec& params )
     : name( name ), params( params ) {}
@@ -8,7 +10,7 @@ PlanAction::PlanAction( const std::string& name, const StringVec& params )
 bool PlanAction::holds( State * s, Domain * d ) {
     if ( d->actions.index( name ) >= 0 ) {
         Action * a = d->actions.get( name );
-        return holdsRec( s, d, a->pre );
+        return ConditionChecker::holds( s, d, a->pre, params );
     }
 
     showErrorMsg( "Unknown action " + getActionName() );
@@ -39,112 +41,6 @@ std::string PlanAction::getActionName() const {
     return ss.str();
 }
 
-bool PlanAction::holdsRec( State * s, Domain * d, Condition * c ) {
-    And * a = dynamic_cast< And * >( c );
-    if ( a ) {
-        for ( unsigned i = 0; i < a->conds.size(); ++i ) {
-            if ( !holdsRec( s, d, a->conds[i] ) ) {
-                return false;
-            }
-        }
-    }
-
-    Equals * eq = dynamic_cast< Equals * >( c );
-    if ( eq ) {
-        StringVec objParams = getObjectParameters( d, eq );
-        return objParams[0] == objParams[1];
-    }
-
-    Ground * g = dynamic_cast< Ground * >( c );
-    if ( g ) {
-        if ( !s->holds( false, g->name, getObjectParameters( d, g ) ) ) {
-            return false;
-        }
-    }
-
-    Not * n = dynamic_cast< Not * >( c );
-    if ( n ) {
-        return !holdsRec( s, d, n->cond );
-    }
-
-    Forall * f = dynamic_cast< Forall * >( c );
-    if ( f ) {
-        StringVec forallParams = d->typeList( f );
-        return forallHoldsRec( forallParams, 0, s, d, f->cond );
-    }
-
-    Exists * e = dynamic_cast< Exists * >( c );
-    if ( e ) {
-        StringVec existsParams = d->typeList( e );
-        return existsHoldsRec( existsParams, 0, s, d, e->cond );
-    }
-
-    Or * o = dynamic_cast< Or * >( c );
-    if ( o ) {
-        return holdsRec( s, d, o->first ) || holdsRec( s, d, o->second );
-    }
-
-    return true;
-}
-
-bool PlanAction::forallHoldsRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
-    if ( paramIndex < forallParams.size() ) {
-        Type * type = d->getType( forallParams[paramIndex] );
-
-        long numConstants = type->noConstants();
-        long numObjects = type->noObjects() - numConstants;
-
-        for ( long i = -numConstants; i < numObjects; ++i ) {
-            std::pair< std::string, int > typeObj = type->object( i );
-
-            if ( !typeObj.first.empty() ) {
-                params.push_back( typeObj.first );  // expand action params
-                bool result = forallHoldsRec( forallParams, paramIndex + 1, s, d, c );
-                params.pop_back();  // remove previously added params
-
-                if ( !result ) {
-                    return false;
-                }
-            }
-        }
-    }
-    else {
-        // all forall parameters instantiated and added to action params,
-        // continue checking satisfiability
-        return holdsRec( s, d, c );
-    }
-
-    return true;
-}
-
-bool PlanAction::existsHoldsRec( const StringVec& existsParams, unsigned paramIndex, State * s, Domain * d, Condition * c ) {
-    if ( paramIndex < existsParams.size() ) {
-        Type * type = d->getType( existsParams[paramIndex] );
-
-        long numConstants = type->noConstants();
-        long numObjects = type->noObjects() - numConstants;
-
-        for ( long i = -numConstants; i < numObjects; ++i ) {
-            std::pair< std::string, int > typeObj = type->object( i );
-
-            if ( !typeObj.first.empty() ) {
-                params.push_back( typeObj.first );  // expand action params
-                bool result = existsHoldsRec( existsParams, paramIndex + 1, s, d, c );
-                params.pop_back();  // remove previously added params
-
-                if ( result ) {
-                    return true;
-                }
-            }
-        }
-    }
-    else {
-        return holdsRec( s, d, c );
-    }
-
-    return false;
-}
-
 void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList ) {
     And * a = dynamic_cast< And * >( c );
     if ( a ) {
@@ -155,13 +51,13 @@ void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c,
 
     Ground * g = dynamic_cast< Ground * >( c );
     if ( g ) {
-        addList.push_back( std::make_pair( g->name, getObjectParameters( d, g ) ) );
+        addList.push_back( std::make_pair( g->name, getObjectParameters( d, g, params ) ) );
     }
 
     Not * n = dynamic_cast< Not * >( c );
     if ( n ) {
         Ground * ng = n->cond;
-        deleteList.push_back( std::make_pair( ng->name, getObjectParameters( d, ng ) ) );
+        deleteList.push_back( std::make_pair( ng->name, getObjectParameters( d, ng, params ) ) );
     }
 
     Forall * f = dynamic_cast< Forall * >( c );
@@ -172,7 +68,7 @@ void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c,
 
     When * w = dynamic_cast< When * >( c );
     if ( w ) {
-        bool conditionHolds = holdsRec( s, d, w->pars );
+        bool conditionHolds = ConditionChecker::holds( s, d, w->pars, params );
         if ( conditionHolds ) {
             applyRec( s, d, ins, w->cond, addList, deleteList, funcList );
         }
@@ -181,7 +77,7 @@ void PlanAction::applyRec( State * s, Domain * d, Instance * ins, Condition * c,
     FunctionModifier * fm = dynamic_cast< FunctionModifier * >( c );
     if ( fm ) {
         std::string functionName = fm->modifiedGround ? fm->modifiedGround->name : "TOTAL-COST";
-        StringVec functionParameters = getObjectParameters( d, fm->modifiedGround );
+        StringVec functionParameters = getObjectParameters( d, fm->modifiedGround, params );
         double changedValue = fm->modifierExpr->evaluate( *ins, params );
 
         if ( dynamic_cast< Decrease * >( fm ) ) {
@@ -214,26 +110,6 @@ void PlanAction::forallApplyRec( const StringVec& forallParams, unsigned paramIn
         // continue checking satisfiability
         applyRec( s, d, ins, c, addList, deleteList, funcList );
     }
-}
-
-StringVec PlanAction::getObjectParameters( Domain * d, Ground * g ) const {
-    if ( !g ) {
-        // can happen when incrementing or decrementing TOTAL-COST
-        return StringVec();
-    }
-
-    IntVec& groundParams = g->params;
-    StringVec objParams;
-    for ( unsigned i = 0; i < groundParams.size(); ++i ) {
-        if ( groundParams[i] >= 0 ) {
-            objParams.push_back( params[groundParams[i]] );
-        }
-        else { // constant
-            Type * constantType = d->types[g->lifted->params[i]];
-            objParams.push_back( constantType->object( groundParams[i] ).first );
-        }
-    }
-    return objParams;
 }
 
 void PlanAction::applyDeleteList( State * s, const GroundedObjVec& deleteList ) const {

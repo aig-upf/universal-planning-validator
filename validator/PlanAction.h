@@ -41,17 +41,9 @@ public:
     }
 
 protected:
-    bool holdsRec( State * s, Domain * d, Condition * c );
-
-    bool forallHoldsRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Condition * c );
-
-    bool existsHoldsRec( const StringVec& existsParams, unsigned paramIndex, State * s, Domain * d, Condition * c );
-
     void applyRec( State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList );
 
     void forallApplyRec( const StringVec& forallParams, unsigned paramIndex, State * s, Domain * d, Instance * ins, Condition * c, GroundedObjVec& addList, GroundedObjVec& deleteList, FunctionModifierObjVec& funcList );
-
-    StringVec getObjectParameters( Domain * d, Ground * g ) const;
 
     void applyDeleteList( State * s, const GroundedObjVec& deleteList ) const;
 
