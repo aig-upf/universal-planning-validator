@@ -7,16 +7,18 @@ PlanningProgram::PlanningProgram( const std::string & s ) {
 }
 
 PlanningProgram::~PlanningProgram() {
-    for ( unsigned i = 0; i < instructions.size(); ++i ) {
-        delete instructions[i];
+    for ( auto it = procedures.begin(); it != procedures.end(); ++it ) {
+        delete it->second;
     }
 }
 
 void PlanningProgram::parse( const std::string & s ) {
     Filereader f( s );
 
-    std::map< unsigned, GotoInstruction * > pendingGotos; // <line, goto>
-    std::map< unsigned, GotoConditionInstruction * > pendingGotoConds;
+    InstructionVec instructions;
+
+    std::map< std::pair< long, unsigned >, GotoInstruction * > pendingGotos; // <(procedure, line), goto>
+    std::map< std::pair< long, unsigned >, GotoConditionInstruction * > pendingGotoConds;
 
     while ( !f.f.eof() && !f.s.empty() ) {
         f.c = 0;
@@ -42,9 +44,11 @@ void PlanningProgram::parse( const std::string & s ) {
             GotoInstruction * instr = new GotoInstruction( instrName );
             instructions.push_back( instr );
 
-            auto pendingCond = pendingGotoConds.find( instr->line );
+            std::pair< long, unsigned > procLinePair( instr->procedureId, instr->line );
+
+            auto pendingCond = pendingGotoConds.find( procLinePair );
             if ( pendingCond == pendingGotoConds.end() ) {
-                pendingGotos[instr->line] = instr;
+                pendingGotos[procLinePair] = instr;
             }
             else {
                 instr->condition = pendingCond->second;
@@ -69,9 +73,11 @@ void PlanningProgram::parse( const std::string & s ) {
 
             GotoConditionInstruction * instr = new GotoConditionInstruction( instrName, instrParams );
 
-            auto pendingGoto = pendingGotos.find( instr->line );
+            std::pair< long, unsigned > procLinePair( instr->procedureId, instr->line );
+
+            auto pendingGoto = pendingGotos.find( procLinePair );
             if ( pendingGoto == pendingGotos.end() ) {
-                pendingGotoConds[instr->line] = instr;
+                pendingGotoConds[procLinePair] = instr;
             }
             else {
                 pendingGoto->second->condition = instr;
@@ -90,12 +96,14 @@ void PlanningProgram::parse( const std::string & s ) {
         getline( f.f, f.s );
     }
 
-    std::sort( instructions.begin(), instructions.end(), ProgramInstructionCmp() );
+    addInstructionsToProcedures( instructions );
 
     name = s;
 }
 
 bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
+    InstructionVec& instructions = procedures[mainProcedureId]->instructions;
+
     if ( instructions.empty() ) {
         // error
     }
@@ -118,6 +126,36 @@ bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
 
 unsigned PlanningProgram::getNumActions() const {
     return 0;
+}
+
+void PlanningProgram::addInstructionsToProcedures( InstructionVec& instructions ) {
+    // sort them in decreasing order of procedure, and increasing line number
+    std::sort( instructions.begin(), instructions.end(), ProgramInstructionCmp() );
+
+    long maxProcedureId = -1;
+
+    for ( auto instr = instructions.begin(); instr != instructions.end(); ++instr ) {
+        ProgramInstruction * pi = *instr;
+
+        if ( pi->procedureId < 0 ) { // global end instruction
+            pi->procedureId = maxProcedureId;
+        }
+
+        maxProcedureId = std::max( maxProcedureId, pi->procedureId );
+
+        addInstructionToProcedure( pi );
+    }
+
+    // the main procedure has always the highest procedure id
+    mainProcedureId = maxProcedureId;
+}
+
+void PlanningProgram::addInstructionToProcedure( ProgramInstruction * pi ) {
+    if ( procedures.find( pi->procedureId ) == procedures.end() ) {
+        procedures[pi->procedureId] = new ProgramProcedure();
+    }
+
+    procedures[pi->procedureId]->addInstruction( pi );
 }
 
 bool startsWith( const std::string& testStr, const std::string& prefix ) {

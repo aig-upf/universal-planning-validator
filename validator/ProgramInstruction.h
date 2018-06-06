@@ -9,16 +9,22 @@ typedef std::pair< bool, long > InstructionResult;
 class ProgramInstruction {
 public:
     unsigned line;
-    unsigned procedureId;
+    long procedureId;
 
     virtual ~ProgramInstruction() {}
 
     virtual InstructionResult run( Domain * d, Instance * ins, State * currentState ) = 0;
 };
 
+typedef std::vector< ProgramInstruction * > InstructionVec;
+
 struct ProgramInstructionCmp {
     inline bool operator() (const ProgramInstruction * lhs, const ProgramInstruction * rhs) {
-        return lhs->line < rhs->line;
+        if ( lhs->procedureId == rhs->procedureId ) {
+            return lhs->line < rhs->line;
+        }
+
+        return lhs->procedureId > rhs->procedureId;
     }
 };
 

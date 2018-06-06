@@ -5,6 +5,7 @@
 
 #include "Plan.h"
 #include "ProgramInstruction.h"
+#include "ProgramProcedure.h"
 
 using namespace parser::pddl;
 
@@ -17,7 +18,8 @@ public:
     const std::string END_PREFIX = "INS-END-";
     const std::string CALL_PREFIX = "CALL-";
 
-    std::vector< ProgramInstruction * > instructions;
+    std::map< unsigned, ProgramProcedure * > procedures;
+    long mainProcedureId;
 
     PlanningProgram();
     PlanningProgram( const std::string & s );
@@ -32,6 +34,10 @@ public:
     virtual std::ostream& print( std::ostream& stream ) const {
         return stream;
     }
+
+protected:
+    void addInstructionsToProcedures( InstructionVec& instructions );
+    void addInstructionToProcedure( ProgramInstruction * pi );
 };
 
 bool startsWith( const std::string& testStr, const std::string& prefix );
