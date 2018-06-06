@@ -102,19 +102,41 @@ void PlanningProgram::parse( const std::string & s ) {
 }
 
 bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
-    InstructionVec& instructions = procedures[mainProcedureId]->instructions;
-
-    if ( instructions.empty() ) {
+    // if ( instructions.empty() ) {
         // error
-    }
+    // }
 
-    unsigned currentLine = 0;
+    std::stack< std::pair< long, long > > callStack; // (procedure, line) stack
 
-    while ( currentLine >= 0 && currentLine < instructions.size() ) {
-        ProgramInstruction * pi = instructions[currentLine];
+    ProgramProcedure * currentProcedure = procedures[mainProcedureId];
+    long currentLine = 0;
+
+    bool executionCompleted = false;
+
+    while ( !executionCompleted ) {
+        ProgramInstruction * pi = currentProcedure->getInstruction( currentLine );
         InstructionResult result = pi->run( d, ins, currentState );
-        if ( result.first ) {
-            currentLine = result.second;
+        if ( result.success ) {
+            if ( result.targetLine < 0 ) {
+                if ( callStack.empty() ) {
+                    executionCompleted = true;
+                }
+                else {
+                    std::pair< long, long > call = callStack.top();
+                    currentProcedure = procedures[call.first];
+                    currentLine = call.second;
+                    callStack.pop();
+                }
+            }
+            else {
+                // change of procedure
+                if ( currentProcedure->procedureId != result.targetProcedureId ) {
+                    callStack.push( std::make_pair( currentProcedure->procedureId, currentLine + 1 ) );
+                    currentProcedure = procedures[result.targetProcedureId];
+                }
+
+                currentLine = result.targetLine;
+            }
         }
         else {
             return false;
@@ -152,7 +174,7 @@ void PlanningProgram::addInstructionsToProcedures( InstructionVec& instructions 
 
 void PlanningProgram::addInstructionToProcedure( ProgramInstruction * pi ) {
     if ( procedures.find( pi->procedureId ) == procedures.end() ) {
-        procedures[pi->procedureId] = new ProgramProcedure();
+        procedures[pi->procedureId] = new ProgramProcedure( pi->procedureId );
     }
 
     procedures[pi->procedureId]->addInstruction( pi );

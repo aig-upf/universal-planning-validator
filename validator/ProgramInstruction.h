@@ -4,11 +4,24 @@
 
 #include "PlanAction.h"
 
-typedef std::pair< bool, long > InstructionResult;
+// typedef std::pair< bool, long > InstructionResult;
+
+class InstructionResult {
+public:
+    bool success;
+    long targetProcedureId;
+    long targetLine;
+
+    InstructionResult( bool psuccess, long ptargetProcedureId, long ptargetLine):
+        success( psuccess ), targetProcedureId( ptargetProcedureId ), targetLine( ptargetLine )
+    {
+
+    }
+};
 
 class ProgramInstruction {
 public:
-    unsigned line;
+    long line;
     long procedureId;
 
     virtual ~ProgramInstruction() {}
@@ -66,7 +79,7 @@ public:
             pa.apply( currentState, d, ins );
         }
 
-        return InstructionResult( stateHolds, line + 1 );
+        return InstructionResult( stateHolds, procedureId, line + 1 );
     }
 };
 
@@ -89,7 +102,7 @@ public:
 
     InstructionResult run( Domain * d, Instance * ins, State * currentState ) {
         bool result = currentState->holds( false, predicateName, predicateParams );
-        return InstructionResult( result, line );
+        return InstructionResult( result, procedureId, line );
     }
 };
 
@@ -123,11 +136,11 @@ public:
         long nextLine = line + 1;
 
         InstructionResult res = condition->run( d, ins, currentState );
-        if ( !res.first ) {
+        if ( !res.success ) {
             nextLine = jumpLine;
         }
 
-        return InstructionResult( true, nextLine );
+        return InstructionResult( true, procedureId, nextLine );
     }
 };
 
@@ -149,7 +162,7 @@ public:
     }
 
     InstructionResult run( Domain * d, Instance * ins, State * currentState ) {
-        return InstructionResult( true, -1 );
+        return InstructionResult( true, procedureId, -1 );
     }
 };
 
@@ -170,6 +183,6 @@ public:
     }
 
     InstructionResult run( Domain * d, Instance * ins, State * currentState ) {
-        return InstructionResult( true, line + 1 );
+        return InstructionResult( true, targetProcedureId, 0 );
     }
 };

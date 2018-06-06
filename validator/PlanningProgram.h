@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include <parser/Instance.h>
 #include <parser/Filereader.h>
 
