@@ -1,4 +1,5 @@
 #include <validator/planning-programs/GotoConditionInstruction.h>
+#include <validator/ConditionChecker.h>
 
 GotoConditionInstruction::GotoConditionInstruction( const std::string& instr, const StringVec& instrParams )
     : predicateParams( instrParams )
@@ -13,6 +14,15 @@ GotoConditionInstruction::GotoConditionInstruction( const std::string& instr, co
 }
 
 InstructionResult GotoConditionInstruction::run( Domain * d, Instance * ins, State * currentState ) {
+    // we don't know whether the predicate is grounded or it is a derived
+    // predicate, so we have to check!
+    if ( d->derived.index( predicateName ) >= 0 ) {
+        Derived * dv = d->derived.get( predicateName );
+        StringVec sv;
+        bool result = ConditionChecker::holds( currentState, d, dv->cond, sv );
+        return InstructionResult( result, procedureId, line );
+    }
+
     bool result = currentState->holds( false, predicateName, predicateParams );
     return InstructionResult( result, procedureId, line );
 }

@@ -21,8 +21,20 @@ bool ConditionChecker::holdsRec( State * s, Domain * d, Condition * c, StringVec
         return objParams[0] == objParams[1];
     }
 
+    Derived * dv = dynamic_cast< Derived * >( c );
+    if ( dv ) {
+        return holdsRec( s, d, dv->cond, params );
+    }
+
     Ground * g = dynamic_cast< Ground * >( c );
     if ( g ) {
+        // check if the ground is actually a derived predicate
+        if ( d->derived.index( g->name ) >= 0 ) {
+            Derived * dv = d->derived.get( g->name );
+            return holdsRec( s, d, dv->cond, params );
+        }
+
+        // if it is an actual ground...
         if ( !s->holds( false, g->name, getObjectParameters( d, g, params ) ) ) {
             return false;
         }
