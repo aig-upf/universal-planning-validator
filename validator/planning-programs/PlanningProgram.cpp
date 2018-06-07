@@ -4,6 +4,7 @@
 #include <validator/planning-programs/EndInstruction.h>
 #include <validator/planning-programs/GotoConditionInstruction.h>
 #include <validator/planning-programs/GotoInstruction.h>
+#include <validator/Message.h>
 
 PlanningProgram::PlanningProgram() {}
 
@@ -144,6 +145,7 @@ bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
             }
         }
         else {
+            showErrorMsg( "Error: Plan failed to execute\n" );
             return false;
         }
     }
