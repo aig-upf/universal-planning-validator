@@ -7,7 +7,7 @@
 #include <validator/PlanValidator.h>
 #include <validator/Plan.h>
 #include <validator/ClassicalPlan.h>
-#include <validator/PlanningProgram.h>
+#include <validator/planning-programs/PlanningProgram.h>
 
 class ClassicalPlanningTests : public TestFixture<ClassicalPlanningTests>
 {

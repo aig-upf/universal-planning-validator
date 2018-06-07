@@ -1,4 +1,4 @@
-#include "State.h"
+#include <validator/State.h>
 
 State::State( Domain * d, Instance * ins ) {
     set( d, ins );

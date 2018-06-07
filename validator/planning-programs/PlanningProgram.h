@@ -5,9 +5,9 @@
 #include <parser/Instance.h>
 #include <parser/Filereader.h>
 
-#include "Plan.h"
-#include "ProgramInstruction.h"
-#include "ProgramProcedure.h"
+#include <validator/Plan.h>
+#include <validator/planning-programs/ProgramInstruction.h>
+#include <validator/planning-programs/ProgramProcedure.h>
 
 using namespace parser::pddl;
 

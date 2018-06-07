@@ -3,8 +3,8 @@
 #include <parser/Instance.h>
 #include <parser/Filereader.h>
 
-#include "Plan.h"
-#include "PlanAction.h"
+#include <validator/Plan.h>
+#include <validator/PlanAction.h>
 
 using namespace parser::pddl;
 

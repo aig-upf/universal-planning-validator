@@ -1,10 +1,10 @@
 #include <iostream>
 #include <cstring>
 #include <parser/Instance.h>
-#include "Plan.h"
-#include "PlanValidator.h"
-#include "ClassicalPlan.h"
-#include "PlanningProgram.h"
+#include <validator/Plan.h>
+#include <validator/PlanValidator.h>
+#include <validator/ClassicalPlan.h>
+#include <validator/planning-programs/PlanningProgram.h>
 
 using namespace parser::pddl;
 

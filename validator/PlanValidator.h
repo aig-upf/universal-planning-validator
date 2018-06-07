@@ -1,7 +1,7 @@
 #pragma once
 
-#include "State.h"
-#include "Plan.h"
+#include <validator/State.h>
+#include <validator/Plan.h>
 
 using namespace parser::pddl;
 

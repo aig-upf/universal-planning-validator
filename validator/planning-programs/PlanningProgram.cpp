@@ -1,4 +1,4 @@
-#include "PlanningProgram.h"
+#include <validator/planning-programs/PlanningProgram.h>
 
 PlanningProgram::PlanningProgram() {}
 

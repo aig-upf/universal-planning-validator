@@ -1,6 +1,6 @@
-#include "ClassicalPlan.h"
-#include "Message.h"
-#include "PlanValidator.h"
+#include <validator/ClassicalPlan.h>
+#include <validator/Message.h>
+#include <validator/PlanValidator.h>
 
 ClassicalPlan::ClassicalPlan() {}
 ClassicalPlan::ClassicalPlan( const std::string & s ) {

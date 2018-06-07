@@ -1,10 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-
-#include "PlanAction.h"
-
-// typedef std::pair< bool, long > InstructionResult;
+#include <validator/PlanAction.h>
 
 class InstructionResult {
 public:
@@ -101,8 +98,6 @@ public:
     }
 
     InstructionResult run( Domain * d, Instance * ins, State * currentState ) {
-        // Derived * de = d->derived.get( predicateName );
-
         bool result = currentState->holds( false, predicateName, predicateParams );
         return InstructionResult( result, procedureId, line );
     }

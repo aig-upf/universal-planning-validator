@@ -1,8 +1,8 @@
-#include "PlanAction.h"
-#include "Message.h"
-#include "PlanValidator.h"
-#include "ConditionChecker.h"
-#include "Utils.h"
+#include <validator/PlanAction.h>
+#include <validator/Message.h>
+#include <validator/PlanValidator.h>
+#include <validator/ConditionChecker.h>
+#include <validator/Utils.h>
 
 PlanAction::PlanAction( const std::string& name, const StringVec& params )
     : name( name ), params( params ) {}

@@ -1,4 +1,4 @@
-#include "Message.h"
+#include <validator/Message.h>
 
 void showErrorMsg( const std::string& s ) {
     std::cerr << "\033[1;31m" << s << "\033[0m\n";

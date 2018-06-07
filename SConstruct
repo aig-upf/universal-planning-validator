@@ -42,6 +42,7 @@ build_dirname = "build"
 base.VariantDir(build_dirname, '.')
 
 sources = glob.glob( src_path + "/*.cpp" )
+sources.extend( glob.glob( src_path + "/planning-programs/*.cpp" ) )
 build_files = [build_dirname + "/" + src for src in sources]
 
 static_lib = base.Library('lib/validator', build_files)
