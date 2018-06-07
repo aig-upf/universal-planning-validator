@@ -1,4 +1,9 @@
 #include <validator/planning-programs/PlanningProgram.h>
+#include <validator/planning-programs/ActionInstruction.h>
+#include <validator/planning-programs/CallInstruction.h>
+#include <validator/planning-programs/EndInstruction.h>
+#include <validator/planning-programs/GotoConditionInstruction.h>
+#include <validator/planning-programs/GotoInstruction.h>
 
 PlanningProgram::PlanningProgram() {}
 
