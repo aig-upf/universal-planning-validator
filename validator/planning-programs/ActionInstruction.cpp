@@ -31,11 +31,11 @@ ActionInstruction::ActionInstruction( const std::string& instr ) {
 InstructionResult ActionInstruction::run( Domain * d, Instance * ins, State * currentState ) {
     bool verbose = PlanValidator::getInstance()->getVerbose();
 
-    PlanAction pa( name, StringVec() );
-
     if ( verbose ) {
         showMsg( "Checking action " + name + " - Procedure: " + std::to_string( procedureId ) + " - Line: " + std::to_string( line ) );
     }
+
+    PlanAction pa( name, StringVec() );
 
     bool stateHolds = pa.holds( currentState, d );
     if ( stateHolds ) {
