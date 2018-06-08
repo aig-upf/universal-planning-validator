@@ -9,7 +9,7 @@
 using namespace parser::pddl;
 
 void showHelp() {
-    std::cout << "AUV: An Unnamed Validator\n";
+    std::cout << "Universal Planning Validator\n";
     std::cout << "Usage: ./validate [options] <domain.pddl> <task.pddl> <plan>\n";
     std::cout << "Options:\n";
     std::cout << "\t-h\t-- Print this message.\n";
