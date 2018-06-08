@@ -15,7 +15,7 @@ ActionInstruction::ActionInstruction( const std::string& instr ) {
         existsProcedureId = true;
     }
     catch ( const std::invalid_argument& ia ) {
-        procedureId = 0;  // only one procedure exists!
+        procedureId = -1;  // only one procedure exists!
     }
 
     if ( existsProcedureId ) {

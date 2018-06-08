@@ -26,6 +26,8 @@ void PlanningProgram::parse( const std::string & s ) {
     std::map< std::pair< long, unsigned >, GotoInstruction * > pendingGotos; // <(procedure, line), goto>
     std::map< std::pair< long, unsigned >, GotoConditionInstruction * > pendingGotoConds;
 
+    unsigned numProcedures = 0;
+
     while ( !f.f.eof() && !f.s.empty() ) {
         f.c = 0;
         f.next();
@@ -38,6 +40,8 @@ void PlanningProgram::parse( const std::string & s ) {
 
             ProgramInstruction * instr = new EndInstruction( instrName );
             instructions.push_back( instr );
+
+            ++numProcedures;
         }
         else if ( startsWith( instrName, INSTR_PREFIX ) ) {
             f.next();
@@ -102,6 +106,8 @@ void PlanningProgram::parse( const std::string & s ) {
         getline( f.f, f.s );
     }
 
+    mainProcedureId = numProcedures - 1;
+
     addInstructionsToProcedures( instructions );
 
     name = s;
@@ -158,25 +164,25 @@ unsigned PlanningProgram::getNumActions() const {
 }
 
 void PlanningProgram::addInstructionsToProcedures( InstructionVec& instructions ) {
+    // instructions not linked to a procedure at assigned to the main one
+    for ( auto instr = instructions.begin(); instr != instructions.end(); ++instr ) {
+        ProgramInstruction * pi = *instr;
+        if ( pi->procedureId < 0 ) { // global end instruction
+            pi->procedureId = mainProcedureId;
+        }
+    }
+
     // sort them in decreasing order of procedure, and increasing line number
     std::sort( instructions.begin(), instructions.end(), ProgramInstructionCmp() );
 
-    long maxProcedureId = -1;
-
     for ( auto instr = instructions.begin(); instr != instructions.end(); ++instr ) {
         ProgramInstruction * pi = *instr;
-
         if ( pi->procedureId < 0 ) { // global end instruction
-            pi->procedureId = maxProcedureId;
+            pi->procedureId = mainProcedureId;
         }
-
-        maxProcedureId = std::max( maxProcedureId, pi->procedureId );
 
         addInstructionToProcedure( pi );
     }
-
-    // the main procedure has always the highest procedure id
-    mainProcedureId = maxProcedureId;
 }
 
 void PlanningProgram::addInstructionToProcedure( ProgramInstruction * pi ) {
