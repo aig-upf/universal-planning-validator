@@ -111,6 +111,7 @@ public:
         TEST_CASE( summatoryTest );
         TEST_CASE( gripperTest );
         TEST_CASE( sortTest );
+        TEST_CASE( fibonacciTest );
     }
 
     template < typename T >
@@ -153,6 +154,13 @@ public:
         parser::pddl::Domain d( "tests/planning-programs/sorting/dom.pddl");
         parser::pddl::Instance ins( d, "tests/planning-programs/sorting/sort4.pddl" );
         PlanningProgram p( "tests/planning-programs/sorting/program.txt" );
+        callValidator( &d, &ins, &p );
+    }
+
+    void fibonacciTest() {
+        parser::pddl::Domain d( "tests/planning-programs/fibonacci/dom.pddl");
+        parser::pddl::Instance ins( d, "tests/planning-programs/fibonacci/fibonacci6.pddl" );
+        PlanningProgram p( "tests/planning-programs/fibonacci/program.txt" );
         callValidator( &d, &ins, &p );
     }
 };
