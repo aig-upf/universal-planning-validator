@@ -109,6 +109,8 @@ public:
     TEST_FIXTURE( PlanningProgramsTests )
     {
         TEST_CASE( summatoryTest );
+        TEST_CASE( gripperTest );
+        TEST_CASE( sortTest );
     }
 
     template < typename T >
@@ -137,6 +139,20 @@ public:
         parser::pddl::Domain d( "tests/planning-programs/summatory/dom.pddl");
         parser::pddl::Instance ins( d, "tests/planning-programs/summatory/sumatory21.pddl" );
         PlanningProgram p( "tests/planning-programs/summatory/program.txt" );
+        callValidator( &d, &ins, &p );
+    }
+
+    void gripperTest() {
+        parser::pddl::Domain d( "tests/planning-programs/gripper/dom.pddl");
+        parser::pddl::Instance ins( d, "tests/planning-programs/gripper/prob4.pddl" );
+        PlanningProgram p( "tests/planning-programs/gripper/program.txt" );
+        callValidator( &d, &ins, &p );
+    }
+
+    void sortTest() {
+        parser::pddl::Domain d( "tests/planning-programs/sorting/dom.pddl");
+        parser::pddl::Instance ins( d, "tests/planning-programs/sorting/sort4.pddl" );
+        PlanningProgram p( "tests/planning-programs/sorting/program.txt" );
         callValidator( &d, &ins, &p );
     }
 };
