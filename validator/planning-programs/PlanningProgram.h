@@ -23,6 +23,9 @@ public:
     std::map< unsigned, ProgramProcedure * > procedures;
     long mainProcedureId;
 
+    // number of run actions after executing the plan
+    unsigned numRunActions;
+
     PlanningProgram();
     PlanningProgram( const std::string & s );
 

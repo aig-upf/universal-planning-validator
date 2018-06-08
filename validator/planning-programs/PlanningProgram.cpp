@@ -6,9 +6,15 @@
 #include <validator/planning-programs/GotoInstruction.h>
 #include <validator/Message.h>
 
-PlanningProgram::PlanningProgram() {}
+PlanningProgram::PlanningProgram()
+    : numRunActions( 0 )
+{
+    // empty
+}
 
-PlanningProgram::PlanningProgram( const std::string & s ) {
+PlanningProgram::PlanningProgram( const std::string & s )
+    : numRunActions( 0 )
+{
     parse( s );
 }
 
@@ -114,9 +120,7 @@ void PlanningProgram::parse( const std::string & s ) {
 }
 
 bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
-    // if ( instructions.empty() ) {
-        // error
-    // }
+    numRunActions = 0;
 
     std::stack< std::pair< long, long > > callStack; // (procedure, line) stack
 
@@ -154,13 +158,15 @@ bool PlanningProgram::run( Domain * d, Instance * ins, State * currentState ) {
             showErrorMsg( "Error: Plan failed to execute\n" );
             return false;
         }
+
+        ++numRunActions;
     }
 
     return true;
 }
 
 unsigned PlanningProgram::getNumActions() const {
-    return 0;
+    return numRunActions;
 }
 
 void PlanningProgram::addInstructionsToProcedures( InstructionVec& instructions ) {
