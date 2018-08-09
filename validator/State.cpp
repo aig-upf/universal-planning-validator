@@ -99,6 +99,10 @@ double State::getValueForFunction( const std::string& name, const StringVec& par
     throw UndefinedFunctionValue( ss.str() );
 }
 
+std::map< std::string, std::set< StringVec > >& State::getFluents( ) {
+	return fluents;
+}
+
 std::set< StringVec >& State::getActiveFluents( const std::string& name ) {
     auto fluentSet = fluents.find( name );
 

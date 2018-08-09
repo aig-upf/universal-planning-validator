@@ -41,6 +41,8 @@ public:
     double getTotalCostValue() const;
 
     double getValueForFunction( const std::string& name, const StringVec& params ) const;
+	
+	std::map< std::string, std::set< StringVec > >& getFluents( );
 
 protected:
     std::set< StringVec >& getActiveFluents( const std::string& name );
