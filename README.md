@@ -1,31 +1,31 @@
 # Universal Planning Validator
-Software that can be used to validate (still unfinished):
+
+Software that can be used to validate:
 * Classical planning problems.
 * Planning programs.
 
-In the future we plan to add support for multiagent and temporal planning problems.
+_The software is still under heavy development_. You can take a look to the [issues](https://github.com/aig-upf/universal-planning-validator/issues) to know about current bugs. In the future we plan to add support for multiagent and temporal planning problems.
 
 ## Installation
 
-You must first clone the [Universal PDDL Parser](https://github.com/aig-upf/universal-pddl-parser):
+Firstly, make sure you have the `scons` tool installed in your computer. You will need it to compile the software.
 
-```
-git clone https://github.com/aig-upf/universal-pddl-parser.git
-```
-
-Follow the instructions in that repository to build the software. Then, clone
-this repository next to the Universal PDDL Parser (alternatively, set the `PDDL_PARSER_PATH`
-environment variable to the parser path):
+Then, you have to either clone or download this repository. To clone it, you can use the following command:
 
 ```
 git clone https://github.com/aig-upf/universal-planning-validator.git
 ```
 
-Finally, build the content of the validator by doing the following:
+This repository references the `universal-pddl-parser` repository. There are two ways of referencing that repository:
+
+1. You use the `universal-pddl-parser` submodule inside this repository.
+1. You use the `PDDL_PARSER_PATH` environment variable, which should contain the path to the `universal-pddl-parser` repository.
+
+Finally, to compile the repository tools, run the following command:
 
 ```
 cd universal-planning-validator
-scons
+./build.sh
 ```
 
 Once the software is built, you can run the tests to check that the validator
